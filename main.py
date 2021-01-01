@@ -129,6 +129,7 @@ def render_state(state, display):
 
 def main():
     pygame.init()
+    print(pygame.display.Info())
 
     if environ.get('FULL_SCREEN') is not None:
         print("Using full screen mode")
