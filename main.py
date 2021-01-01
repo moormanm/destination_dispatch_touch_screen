@@ -1,6 +1,7 @@
 import pygame
 from state import *
 import time
+from os import environ
 
 blue = (0, 96, 255)
 
@@ -129,7 +130,10 @@ def render_state(state, display):
 def main():
     pygame.init()
 
-    display = pygame.display.set_mode((1024, 768))
+    if environ.get('FULL_SCREEN') is not None:
+        display = pygame.display.set_mode((1024, 768),  pygame.FULLSCREEN)
+    else:
+        display = pygame.display.set_mode((1024, 768))
 
     state = State()
 

@@ -87,8 +87,8 @@ class KeypadButton(pygame.sprite.Sprite):
     def __init__(self, button_id, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.button_id = button_id
-        self.pressed_image = Assets.button_pressed.convert().copy()
-        self.unpressed_image = Assets.button_unpressed.convert().copy()
+        self.pressed_image = Assets.button_pressed.convert_alpha().copy()
+        self.unpressed_image = Assets.button_unpressed.convert_alpha().copy()
         self.image = self.unpressed_image
         self.rect = self.image.get_rect()
         self.rect.x = x
