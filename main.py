@@ -132,7 +132,7 @@ def main():
 
     if environ.get('FULL_SCREEN') is not None:
         print("Using full screen mode")
-        display = pygame.display.set_mode((1024, 768),  pygame.FULLSCREEN)
+        display = pygame.display.set_mode((0, 0),  pygame.FULLSCREEN)
     else:
         print("Using windowed mode")
         display = pygame.display.set_mode((1024, 768))
