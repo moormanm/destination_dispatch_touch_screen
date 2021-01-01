@@ -80,7 +80,7 @@ class Assets:
     button_pressed = pygame.transform.scale(pygame.image.load('assets/button_pressed.png'), (100, 100))
     button_unpressed = pygame.transform.scale(pygame.image.load('assets/button_unpressed.png'), (100, 100))
     font = pygame.font.SysFont('Sans', 32)
-    beep_sound = pygame.mixer.Sound("assets/beep.wav")
+    beep_sound = pygame.mixer.Sound("assets/beep.mp3")
 
 
 class KeypadButton(pygame.sprite.Sprite):
