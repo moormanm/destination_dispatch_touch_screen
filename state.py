@@ -35,7 +35,7 @@ def init_keypad_sprites():
     ret = pygame.sprite.Group()
 
     x_origin = 50
-    y_origin = 200
+    y_origin = 50
     x_space = 130
     y_space = 130
     x_idx = 0

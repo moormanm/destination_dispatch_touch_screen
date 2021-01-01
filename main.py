@@ -136,7 +136,7 @@ def main():
         display = pygame.display.set_mode((0, 0),  pygame.FULLSCREEN)
     else:
         print("Using windowed mode")
-        display = pygame.display.set_mode((1024, 768))
+        display = pygame.display.set_mode((1024, 600))
 
     state = State()
 
