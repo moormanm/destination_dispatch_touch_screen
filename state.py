@@ -33,11 +33,11 @@ class State:
 
 
 class Direction(enum.Enum):
-    Left = 1
-    Right = 2
-    Back = 3
-    BackLeft = 4
-    BackRight = 5
+    Left = 0
+    Right = 1
+    Back = 2
+    BackLeft = 3
+    BackRight = 4
 
 
 def init_keypad_sprites():
