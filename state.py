@@ -27,6 +27,17 @@ class State:
         self.appending_input_start_millis = 0
         self.directing_to_floor_start_millis = 0
         self.showing_error_start_millis = 0
+        self.selected_car = ""
+        self.selected_floor = ""
+        self.direction_of_car = None
+
+
+class Direction(enum.Enum):
+    Left = 1
+    Right = 2
+    Back = 3
+    BackLeft = 4
+    BackRight = 5
 
 
 def init_keypad_sprites():
@@ -72,5 +83,3 @@ def init_keypad_sprites():
     ret.add(KeypadButton("0", x_origin + x_space * x_idx, y_origin + y_space * y_idx))
 
     return ret
-
-
