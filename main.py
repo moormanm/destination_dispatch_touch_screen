@@ -1,9 +1,11 @@
+import math
+from functools import lru_cache
+
 import pygame
-from state import *
+from state import State, StateType, ErrorType
+from assets import Assets
 import time
 from os import environ
-
-blue = (0, 96, 255)
 
 
 def update_from_accepting_new_input(state):
@@ -86,34 +88,36 @@ def update_from_showing_error(state):
 
 
 def render_from_accepting_new_input(state, display):
-    display.fill(blue)
+    render_bg(display)
     state.keypad_sprites.draw(display)
 
 
 def render_from_appending_input(state, display):
-    display.fill(blue)
+    render_bg(display)
     state.keypad_sprites.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
     display.blit(text, (500, 300))
 
 
 def render_from_directing_to_floor(state, display):
-    display.fill(blue)
-    text1 = Assets.font.render("Proceed to car G", True, (255, 255, 255))
-    text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
-    display.blit(text1, (500, 200))
-    display.blit(text2, (500, 300))
+    render_bg(display)
+    text = Assets.big_font.render("FOLLOW INSTRUCTIONS BELOW", True, (255, 255, 255))
+    display.blit(text, [display.get_width() / 2 - text.get_width() / 2, 50])
+    display.blit(convert_alpha(Assets.dir_l), (500, 200))
+
+
+@lru_cache
+def convert_alpha(img):
+    return img.convert_alpha()
 
 
 def render_from_showing_error(state, display):
-    display.fill(blue)
+    render_bg(display)
     if state.error_type == ErrorType.FloorNotAvailable:
         text1 = Assets.font.render("Floor Not Available", True, (255, 255, 255))
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
-
-
 
 
 update_funcs = {
@@ -146,7 +150,7 @@ def main():
 
     if environ.get('FULL_SCREEN') is not None:
         print("Using full screen mode")
-        display = pygame.display.set_mode((0, 0),  pygame.FULLSCREEN)
+        display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     else:
         print("Using windowed mode")
         display = pygame.display.set_mode((1024, 600))
@@ -164,9 +168,13 @@ def main():
         update_state(state)
         render_state(state, display)
         pygame.display.flip()
-        time.sleep(1/60)
+        time.sleep(1 / 5)
 
     pygame.quit()
+
+
+def render_bg(display):
+    display.blit(Assets.bg, (0, 0))
 
 
 # Press the green button in the gutter to run the script.
