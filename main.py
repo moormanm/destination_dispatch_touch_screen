@@ -1,5 +1,4 @@
-import math
-from functools import lru_cache
+
 
 import pygame
 from state import State, StateType, ErrorType
@@ -106,7 +105,6 @@ def render_from_directing_to_floor(state, display):
     display.blit(convert_alpha(Assets.dir_l), (500, 200))
 
 
-@lru_cache
 def convert_alpha(img):
     return img.convert_alpha()
 
