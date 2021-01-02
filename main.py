@@ -76,7 +76,7 @@ def update_from_appending_input(state):
 
 
 def update_from_directing_to_floor(state):
-    if millis() - state.appending_input_start_millis > 5000:
+    if millis() - state.directing_to_floor_start_millis > 5000:
         transition_to_accepting_new_input(state)
 
 
