@@ -93,14 +93,27 @@ def render_from_accepting_new_input(state, display):
 def render_from_appending_input(state, display):
     display.fill(blue)
     state.keypad_sprites.draw(display)
+    text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
+    display.blit(text, (500, 300))
 
 
 def render_from_directing_to_floor(state, display):
     display.fill(blue)
+    text1 = Assets.font.render("Proceed to car G", True, (255, 255, 255))
+    text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+    display.blit(text1, (500, 200))
+    display.blit(text2, (500, 300))
 
 
-def render_from_showing_floor(state, display):
+def render_from_showing_error(state, display):
     display.fill(blue)
+    if state.error_type == ErrorType.FloorNotAvailable:
+        text1 = Assets.font.render("Floor Not Available", True, (255, 255, 255))
+        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        display.blit(text1, (500, 200))
+        display.blit(text2, (500, 300))
+
+
 
 
 update_funcs = {
@@ -119,7 +132,7 @@ render_funcs = {
     StateType.AcceptingNewInput: render_from_accepting_new_input,
     StateType.AppendingInput: render_from_appending_input,
     StateType.DirectingToFloor: render_from_directing_to_floor,
-    StateType.ShowingError: render_from_showing_floor
+    StateType.ShowingError: render_from_showing_error
 }
 
 
