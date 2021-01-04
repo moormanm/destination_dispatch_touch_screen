@@ -30,6 +30,7 @@ class State:
         self.selected_car = ""
         self.selected_floor = ""
         self.direction_of_car = None
+        self.in_handicap_mode = True
 
 
 class Direction(enum.Enum):

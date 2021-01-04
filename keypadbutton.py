@@ -15,6 +15,7 @@ class KeypadButton(pygame.sprite.Sprite):
         self.rect.y = y
         self.pressed = False
         self.was_depressed = False
+        self.handicap_sound = Assets.handicap_sound_for_button(button_id)
 
         text = Assets.font.render(button_id, True, (0, 0, 0))
         w = text.get_width()
@@ -38,10 +39,13 @@ class KeypadButton(pygame.sprite.Sprite):
                 if self.rect.collidepoint(event.pos):
                     self.was_depressed = True
 
-    def update(self):
+    def update(self, state):
         if self.pressed:
             self.image = self.pressed_image
         else:
             self.image = self.unpressed_image
         if self.was_depressed:
-            Assets.beep_sound.play()
+            if state.in_handicap_mode:
+                self.handicap_sound.play()
+            else:
+                Assets.beep_sound.play()

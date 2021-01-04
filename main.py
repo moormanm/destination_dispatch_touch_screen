@@ -12,7 +12,7 @@ def update_from_accepting_new_input(state):
     for event in state.events:
         for keypad_button in state.keypad_sprites:
             keypad_button.handle_event(event)
-            keypad_button.update()
+            keypad_button.update(state)
             if keypad_button.was_depressed:
                 transition_to_appending_input(state, keypad_button.button_id)
                 return
@@ -74,7 +74,7 @@ def update_from_appending_input(state):
     for event in state.events:
         for keypad_button in state.keypad_sprites:
             keypad_button.handle_event(event)
-            keypad_button.update()
+            keypad_button.update(state)
             if keypad_button.was_depressed:
                 state.floor_selection_buffer = state.floor_selection_buffer + keypad_button.button_id
 
@@ -100,9 +100,11 @@ def update_from_showing_error(state):
         transition_to_accepting_new_input(state)
 
 
+
 def render_from_accepting_new_input(state, display):
     render_bg(display)
     state.keypad_sprites.draw(display)
+
 
 
 def render_from_appending_input(state, display):
