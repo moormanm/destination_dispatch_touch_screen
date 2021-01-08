@@ -27,10 +27,12 @@ class State:
         self.appending_input_start_millis = 0
         self.directing_to_floor_start_millis = 0
         self.showing_error_start_millis = 0
+        self.directing_to_floor_context = {}
         self.selected_car = ""
         self.selected_floor = ""
         self.direction_of_car = None
         self.in_handicap_mode = True
+
 
 
 class Direction(enum.Enum):

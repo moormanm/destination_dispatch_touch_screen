@@ -40,6 +40,7 @@ def transition_to_directing_to_floor(state, selected_floor, selected_car, direct
     state.selected_car = selected_car
     state.selected_floor = selected_floor
     state.direction_of_car = direction_of_car
+    state.directing_to_floor_context = {}
 
 
 def transition_to_accepting_new_input(state):
@@ -47,7 +48,7 @@ def transition_to_accepting_new_input(state):
 
 
 def get_selection_error(selection):
-    if int(selection) > 50:
+    if int(selection) > 32:
         return ErrorType.FloorNotAvailable
 
     return None
@@ -100,11 +101,9 @@ def update_from_showing_error(state):
         transition_to_accepting_new_input(state)
 
 
-
 def render_from_accepting_new_input(state, display):
     render_bg(display)
     state.keypad_sprites.draw(display)
-
 
 
 def render_from_appending_input(state, display):
@@ -128,6 +127,22 @@ def image_of_direction(direction_of_car):
 
 
 def render_from_directing_to_floor(state, display):
+    if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1200:
+        Assets.floor_sound.play()
+        state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
+
+    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1800:
+        Assets.floor_sounds.get(str(int(state.floor_selection_buffer))).play()
+        state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
+
+    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2600:
+        Assets.proceed_to_car_sound.play()
+        state.directing_to_floor_context["STARTED_PROCEED_TO_CAR_SOUND"] = 1
+
+    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 3800:
+        Assets.car_sounds.get(state.selected_car).play()
+        state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
+
     render_bg(display)
     text = Assets.big_font.render("FOLLOW INSTRUCTIONS BELOW", True, (255, 255, 255))
     display.blit(text, [display.get_width() / 2 - text.get_width() / 2, 50])
