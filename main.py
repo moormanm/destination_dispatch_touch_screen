@@ -92,7 +92,7 @@ def update_from_appending_input(state):
 
 
 def update_from_directing_to_floor(state):
-    if millis() - state.directing_to_floor_start_millis > 5000:
+    if millis() - state.directing_to_floor_start_millis > 8000:
         transition_to_accepting_new_input(state)
 
 
@@ -131,15 +131,15 @@ def render_from_directing_to_floor(state, display):
         Assets.floor_sound.play()
         state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
 
-    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1800:
+    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000:
         Assets.floor_sounds.get(str(int(state.floor_selection_buffer))).play()
         state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
 
-    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2600:
+    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900:
         Assets.proceed_to_car_sound.play()
         state.directing_to_floor_context["STARTED_PROCEED_TO_CAR_SOUND"] = 1
 
-    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 3800:
+    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4000:
         Assets.car_sounds.get(state.selected_car).play()
         state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
 

@@ -31,7 +31,7 @@ class Assets:
     }
 
     floor_sounds = {str(floor_number): pygame.mixer.Sound('assets/' + str(floor_number) + '.wav') for floor_number in
-                    range(0, 32)}
+                    range(0, 33)}
 
     car_sounds = {chr(id): pygame.mixer.Sound('assets/' + chr(id) + '.wav') for id in range(ord('A'), ord('Z') + 1)}
 
