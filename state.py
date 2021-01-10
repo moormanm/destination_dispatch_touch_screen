@@ -16,6 +16,13 @@ class ErrorType(enum.Enum):
     CannotAllocateCarAtThisTime = 3
 
 
+class ElevatorArrival:
+    def __init__(self):
+        self.arrives_at = 0
+        self.car = ""
+        self.sound_play_context = {}
+
+
 class State:
     def __init__(self):
         self.run = True
@@ -32,7 +39,7 @@ class State:
         self.selected_floor = ""
         self.direction_of_car = None
         self.in_handicap_mode = True
-
+        self.elevator_arrivals = []
 
 
 class Direction(enum.Enum):

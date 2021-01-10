@@ -39,6 +39,17 @@ class Assets:
 
     floor_sound = pygame.mixer.Sound('assets/Floor.wav')
 
+    to_the_left_sound = pygame.mixer.Sound('assets/To_the_left.wav')
+    to_the_right_sound = pygame.mixer.Sound('assets/To_the_right.wav')
+    to_the_back_sound = pygame.mixer.Sound('assets/To_the_back.wav')
+    to_the_back_left_sound = pygame.mixer.Sound('assets/To_the_back_left.wav')
+    to_the_back_right_sound = pygame.mixer.Sound('assets/To_the_back_right.wav')
+
+    elevator_sound = pygame.mixer.Sound('assets/Elevator.wav')
+    has_arrived_sound = pygame.mixer.Sound('assets/Has_arrived.wav')
+
+
     @classmethod
     def handicap_sound_for_button(cls, button_id):
         return Assets.keypad_sounds.get(button_id)
+

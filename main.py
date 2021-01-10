@@ -1,7 +1,7 @@
 import string
 
 import pygame
-from state import State, StateType, ErrorType, Direction
+from state import State, StateType, ErrorType, Direction, ElevatorArrival
 from assets import Assets
 import time
 from os import environ
@@ -41,6 +41,10 @@ def transition_to_directing_to_floor(state, selected_floor, selected_car, direct
     state.selected_floor = selected_floor
     state.direction_of_car = direction_of_car
     state.directing_to_floor_context = {}
+    arrival = ElevatorArrival()
+    arrival.car = selected_car
+    arrival.arrives_at = millis() + 10000
+    state.elevator_arrivals.append(arrival)
 
 
 def transition_to_accepting_new_input(state):
@@ -68,6 +72,7 @@ def update_from_appending_input(state):
         if selection_error is None:
             car = random_car()
             transition_to_directing_to_floor(state, state.floor_selection_buffer, car, get_direction_of_car(car[0]))
+
         else:
             transition_to_showing_error(state, selection_error)
         return
@@ -102,11 +107,13 @@ def update_from_showing_error(state):
 
 
 def render_from_accepting_new_input(state, display):
+    render_arrivals(state)
     render_bg(display)
     state.keypad_sprites.draw(display)
 
 
 def render_from_appending_input(state, display):
+    render_arrivals(state)
     render_bg(display)
     state.keypad_sprites.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
@@ -120,13 +127,49 @@ direction_to_img = {
     Direction.Right: Assets.dir_r,
     Direction.BackRight: Assets.dir_rd
 }
+direction_to_sound = {
+    Direction.Back: Assets.to_the_back_sound,
+    Direction.Left: Assets.to_the_left_sound,
+    Direction.BackLeft: Assets.to_the_back_left_sound,
+    Direction.Right: Assets.to_the_right_sound,
+    Direction.BackRight: Assets.to_the_back_right_sound
+}
 
 
 def image_of_direction(direction_of_car):
     return direction_to_img.get(direction_of_car)
 
 
+def sound_of_direction(direction_of_car):
+    return direction_to_sound.get(direction_of_car)
+
+
+def play_arrival_sound(car):
+    pass
+
+
+def render_arrivals(state):
+    for arrival in state.elevator_arrivals:
+        t = millis() - arrival.arrives_at;
+        if t < 0:
+            continue
+
+        if "STARTED_ELEVATOR_SOUND" not in arrival.sound_play_context:
+            Assets.elevator_sound.play()
+            arrival.sound_play_context["STARTED_ELEVATOR_SOUND"] = 1
+
+        if "STARTED_CAR_SOUND" not in arrival.sound_play_context and t > 800:
+            Assets.car_sounds.get(arrival.car).play()
+            arrival.sound_play_context["STARTED_CAR_SOUND"] = 1
+
+        if "STARTED_HAS_ARRIVED_SOUND" not in arrival.sound_play_context and t > 1500:
+            Assets.has_arrived_sound.play()
+            arrival.sound_play_context["STARTED_HAS_ARRIVED_SOUND"] = 1
+            state.elevator_arrivals.remove(arrival)
+
+
 def render_from_directing_to_floor(state, display):
+    render_arrivals(state)
     if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1200:
         Assets.floor_sound.play()
         state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
@@ -142,6 +185,10 @@ def render_from_directing_to_floor(state, display):
     if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4000:
         Assets.car_sounds.get(state.selected_car).play()
         state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
+
+    if "STARTED_DIRECTIONAL_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4500:
+        sound_of_direction(state.direction_of_car).play()
+        state.directing_to_floor_context["STARTED_DIRECTIONAL_SOUND"] = 1
 
     render_bg(display)
     text = Assets.big_font.render("FOLLOW INSTRUCTIONS BELOW", True, (255, 255, 255))
@@ -200,6 +247,7 @@ def convert_alpha(img):
 
 
 def render_from_showing_error(state, display):
+    render_arrivals(state)
     render_bg(display)
     if state.error_type == ErrorType.FloorNotAvailable:
         text1 = Assets.font.render("Floor Not Available", True, (255, 255, 255))
