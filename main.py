@@ -9,6 +9,7 @@ import random
 
 
 def update_from_accepting_new_input(state):
+    update_handicap_button_state(state)
     for event in state.events:
         for keypad_button in state.keypad_sprites:
             keypad_button.handle_event(event)
@@ -67,6 +68,7 @@ def get_direction_of_car(car):
 
 
 def update_from_appending_input(state):
+    update_handicap_button_state(state)
     if millis() - state.appending_input_start_millis > 5000:
         selection_error = get_selection_error(state.floor_selection_buffer)
         if selection_error is None:
@@ -96,12 +98,27 @@ def update_from_appending_input(state):
     return
 
 
+def update_handicap_button_state(state):
+    handicap_button = None
+    for hc in state.handicap_button_group:
+        handicap_button = hc
+
+    for event in state.events:
+        handicap_button.handle_event(event)
+        handicap_button.update(state)
+        if handicap_button.was_depressed:
+            state.in_handicap_mode = not state.in_handicap_mode
+            return
+
+
 def update_from_directing_to_floor(state):
+    update_handicap_button_state(state)
     if millis() - state.directing_to_floor_start_millis > 8000:
         transition_to_accepting_new_input(state)
 
 
 def update_from_showing_error(state):
+    update_handicap_button_state(state)
     if millis() - state.showing_error_start_millis > 5000:
         transition_to_accepting_new_input(state)
 
@@ -110,12 +127,15 @@ def render_from_accepting_new_input(state, display):
     render_arrivals(state)
     render_bg(display)
     state.keypad_sprites.draw(display)
-
+    state.handicap_button_group.draw(display)
+    state.about_button_group.draw(display)
 
 def render_from_appending_input(state, display):
     render_arrivals(state)
     render_bg(display)
     state.keypad_sprites.draw(display)
+    state.handicap_button_group.draw(display)
+    state.about_button_group.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
     display.blit(text, (500, 300))
 
@@ -154,15 +174,15 @@ def render_arrivals(state):
         if t < 0:
             continue
 
-        if "STARTED_ELEVATOR_SOUND" not in arrival.sound_play_context:
+        if "STARTED_ELEVATOR_SOUND" not in arrival.sound_play_context and state.in_handicap_mode:
             Assets.elevator_sound.play()
             arrival.sound_play_context["STARTED_ELEVATOR_SOUND"] = 1
 
-        if "STARTED_CAR_SOUND" not in arrival.sound_play_context and t > 800:
+        if "STARTED_CAR_SOUND" not in arrival.sound_play_context and t > 800 and state.in_handicap_mode:
             Assets.car_sounds.get(arrival.car).play()
             arrival.sound_play_context["STARTED_CAR_SOUND"] = 1
 
-        if "STARTED_HAS_ARRIVED_SOUND" not in arrival.sound_play_context and t > 1500:
+        if "STARTED_HAS_ARRIVED_SOUND" not in arrival.sound_play_context and t > 1500 and state.in_handicap_mode:
             Assets.has_arrived_sound.play()
             arrival.sound_play_context["STARTED_HAS_ARRIVED_SOUND"] = 1
             state.elevator_arrivals.remove(arrival)
@@ -170,23 +190,23 @@ def render_arrivals(state):
 
 def render_from_directing_to_floor(state, display):
     render_arrivals(state)
-    if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1200:
+    if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1200 and state.in_handicap_mode:
         Assets.floor_sound.play()
         state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
 
-    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000:
+    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000 and state.in_handicap_mode:
         Assets.floor_sounds.get(str(int(state.floor_selection_buffer))).play()
         state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
 
-    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900:
+    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900 and state.in_handicap_mode:
         Assets.proceed_to_car_sound.play()
         state.directing_to_floor_context["STARTED_PROCEED_TO_CAR_SOUND"] = 1
 
-    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4000:
+    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4000 and state.in_handicap_mode:
         Assets.car_sounds.get(state.selected_car).play()
         state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
 
-    if "STARTED_DIRECTIONAL_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4500:
+    if "STARTED_DIRECTIONAL_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4500 and state.in_handicap_mode:
         sound_of_direction(state.direction_of_car).play()
         state.directing_to_floor_context["STARTED_DIRECTIONAL_SOUND"] = 1
 
@@ -304,7 +324,7 @@ def main():
         update_state(state)
         render_state(state, display)
         pygame.display.flip()
-        time.sleep(1 / 10)
+        time.sleep(1 / 30)
 
     pygame.quit()
 

@@ -1,5 +1,8 @@
 import enum
 import pygame
+
+from aboutbutton import AboutButton
+from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
 
 
@@ -23,6 +26,16 @@ class ElevatorArrival:
         self.sound_play_context = {}
 
 
+def init_handicap_button():
+    ret = pygame.sprite.Group()
+    ret.add(HandicapButton(550, 100))
+    return ret
+
+def init_about_button():
+    ret = pygame.sprite.Group()
+    ret.add(AboutButton(940, 520))
+    return ret
+
 class State:
     def __init__(self):
         self.run = True
@@ -30,6 +43,8 @@ class State:
         self.floor_selection_buffer = ""
         self.error_type = None
         self.keypad_sprites = init_keypad_sprites()
+        self.handicap_button_group = init_handicap_button()
+        self.about_button_group = init_about_button()
         self.events = []
         self.appending_input_start_millis = 0
         self.directing_to_floor_start_millis = 0
@@ -38,7 +53,7 @@ class State:
         self.selected_car = ""
         self.selected_floor = ""
         self.direction_of_car = None
-        self.in_handicap_mode = True
+        self.in_handicap_mode = False
         self.elevator_arrivals = []
 
 
