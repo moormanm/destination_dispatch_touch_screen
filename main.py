@@ -324,7 +324,7 @@ def main():
         update_state(state)
         render_state(state, display)
         pygame.display.flip()
-        time.sleep(1 / 30)
+        time.sleep(1 / 6)
 
     pygame.quit()
 
