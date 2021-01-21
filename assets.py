@@ -16,7 +16,8 @@ class Assets:
     dir_d = pygame.image.load('assets/d.png')
     dir_ld = pygame.image.load('assets/ld.png')
     dir_rd = pygame.image.load('assets/rd.png')
-    handicap_button_pressed = pygame.transform.scale(pygame.image.load('assets/handicap_button_mode_off.png'), (300, 300))
+    handicap_button_pressed = pygame.transform.scale(pygame.image.load('assets/handicap_button_mode_off.png'),
+                                                     (300, 300))
     handicap_button_on = pygame.transform.scale(pygame.image.load('assets/handicap_button_mode_on.png'), (300, 300))
     handicap_button_off = pygame.transform.scale(pygame.image.load('assets/handicap_button_mode_off.png'), (300, 300))
 
@@ -54,9 +55,8 @@ class Assets:
     elevator_sound = pygame.mixer.Sound('assets/Elevator.wav')
     has_arrived_sound = pygame.mixer.Sound('assets/Has_arrived.wav')
 
-
+    entry_not_understood_sound = pygame.mixer.Sound('assets/Entry_not_understood.wav')
 
     @classmethod
     def handicap_sound_for_button(cls, button_id):
         return Assets.keypad_sounds.get(button_id)
-

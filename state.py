@@ -11,6 +11,7 @@ class StateType(enum.Enum):
     AppendingInput = 2
     DirectingToFloor = 3
     ShowingError = 4
+    ShowingAboutScreen = 5
 
 
 class ErrorType(enum.Enum):
@@ -50,11 +51,13 @@ class State:
         self.directing_to_floor_start_millis = 0
         self.showing_error_start_millis = 0
         self.directing_to_floor_context = {}
+        self.showing_error_context = {}
         self.selected_car = ""
         self.selected_floor = ""
         self.direction_of_car = None
         self.in_handicap_mode = False
         self.elevator_arrivals = []
+        self.in_about_mode = False
 
 
 class Direction(enum.Enum):

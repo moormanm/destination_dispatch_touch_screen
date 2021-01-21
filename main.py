@@ -1,4 +1,5 @@
 import string
+from datetime import date
 
 import pygame
 from state import State, StateType, ErrorType, Direction, ElevatorArrival
@@ -8,8 +9,17 @@ from os import environ
 import random
 
 
+def update_from_about_screen(state):
+    if millis() - state.showing_about_start_time > 8000:
+        transition_to_accepting_new_input(state)
+
+
 def update_from_accepting_new_input(state):
     update_handicap_button_state(state)
+    if update_about_button_state(state):
+        transition_to_showing_about_screen(state)
+        return
+
     for event in state.events:
         for keypad_button in state.keypad_sprites:
             keypad_button.handle_event(event)
@@ -33,6 +43,12 @@ def transition_to_showing_error(state, error_type):
     state.state_type = StateType.ShowingError
     state.showing_error_start_millis = millis()
     state.error_type = error_type
+    state.showing_error_context = {}
+
+
+def transition_to_showing_about_screen(state):
+    state.state_type = StateType.ShowingAboutScreen
+    state.showing_about_start_time = millis()
 
 
 def transition_to_directing_to_floor(state, selected_floor, selected_car, direction_of_car):
@@ -111,6 +127,20 @@ def update_handicap_button_state(state):
             return
 
 
+def update_about_button_state(state):
+    about_button = None
+    for hc in state.about_button_group:
+        about_button = hc
+
+    for event in state.events:
+        about_button.handle_event(event)
+        about_button.update(state)
+        if about_button.was_depressed:
+            return True
+
+    return False
+
+
 def update_from_directing_to_floor(state):
     update_handicap_button_state(state)
     if millis() - state.directing_to_floor_start_millis > 8000:
@@ -123,12 +153,25 @@ def update_from_showing_error(state):
         transition_to_accepting_new_input(state)
 
 
+def render_from_showing_about_screen(state, display):
+    render_arrivals(state)
+    render_bg(display)
+    line1 = Assets.font.render("Authors: Rowan Moorman and Michael Mooorman", True, (255, 255, 255))
+    line2 = Assets.font.render("Created date:  2021-01-21", True, (255, 255, 255))
+    line3 = Assets.font.render("Current date:  " + str(date.today()), True, (255, 255, 255))
+
+    display.blit(line1, (100, 100))
+    display.blit(line2, (100, 200))
+    display.blit(line3, (100, 300))
+
+
 def render_from_accepting_new_input(state, display):
     render_arrivals(state)
     render_bg(display)
     state.keypad_sprites.draw(display)
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
+
 
 def render_from_appending_input(state, display):
     render_arrivals(state)
@@ -174,16 +217,19 @@ def render_arrivals(state):
         if t < 0:
             continue
 
-        if "STARTED_ELEVATOR_SOUND" not in arrival.sound_play_context and state.in_handicap_mode:
-            Assets.elevator_sound.play()
+        if "STARTED_ELEVATOR_SOUND" not in arrival.sound_play_context:
+            if state.in_handicap_mode:
+                Assets.elevator_sound.play()
             arrival.sound_play_context["STARTED_ELEVATOR_SOUND"] = 1
 
-        if "STARTED_CAR_SOUND" not in arrival.sound_play_context and t > 800 and state.in_handicap_mode:
-            Assets.car_sounds.get(arrival.car).play()
+        if "STARTED_CAR_SOUND" not in arrival.sound_play_context and t > 800:
+            if state.in_handicap_mode:
+                Assets.car_sounds.get(arrival.car).play()
             arrival.sound_play_context["STARTED_CAR_SOUND"] = 1
 
-        if "STARTED_HAS_ARRIVED_SOUND" not in arrival.sound_play_context and t > 1500 and state.in_handicap_mode:
-            Assets.has_arrived_sound.play()
+        if "STARTED_HAS_ARRIVED_SOUND" not in arrival.sound_play_context and t > 1500:
+            if state.in_handicap_mode:
+                Assets.has_arrived_sound.play()
             arrival.sound_play_context["STARTED_HAS_ARRIVED_SOUND"] = 1
             state.elevator_arrivals.remove(arrival)
 
@@ -270,6 +316,11 @@ def render_from_showing_error(state, display):
     render_arrivals(state)
     render_bg(display)
     if state.error_type == ErrorType.FloorNotAvailable:
+
+        if "ENTRY_NOT_UNDERSTOOD_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
+            Assets.entry_not_understood_sound.play()
+            state.showing_error_context["ENTRY_NOT_UNDERSTOOD_SOUND"] = 1
+
         text1 = Assets.font.render("Floor Not Available", True, (255, 255, 255))
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
         display.blit(text1, (500, 200))
@@ -280,7 +331,8 @@ update_funcs = {
     StateType.AcceptingNewInput: update_from_accepting_new_input,
     StateType.AppendingInput: update_from_appending_input,
     StateType.DirectingToFloor: update_from_directing_to_floor,
-    StateType.ShowingError: update_from_showing_error
+    StateType.ShowingError: update_from_showing_error,
+    StateType.ShowingAboutScreen: update_from_about_screen
 }
 
 
@@ -292,7 +344,8 @@ render_funcs = {
     StateType.AcceptingNewInput: render_from_accepting_new_input,
     StateType.AppendingInput: render_from_appending_input,
     StateType.DirectingToFloor: render_from_directing_to_floor,
-    StateType.ShowingError: render_from_showing_error
+    StateType.ShowingError: render_from_showing_error,
+    StateType.ShowingAboutScreen: render_from_showing_about_screen
 }
 
 
