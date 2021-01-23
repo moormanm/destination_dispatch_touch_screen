@@ -159,10 +159,19 @@ def render_from_showing_about_screen(state, display):
     line1 = Assets.font.render("Authors: Rowan Moorman and Michael Mooorman", True, (255, 255, 255))
     line2 = Assets.font.render("Created date:  2021-01-21", True, (255, 255, 255))
     line3 = Assets.font.render("Current date:  " + str(date.today()), True, (255, 255, 255))
-
+    line4 = Assets.font.render("Days until Rowan's next birthday:  " + str(days_until_rowans_next_birthday()), True,
+                               (255, 255, 255))
     display.blit(line1, (100, 100))
     display.blit(line2, (100, 200))
     display.blit(line3, (100, 300))
+    display.blit(line4, (100, 400))
+
+
+def days_until_rowans_next_birthday():
+    today = date.today()
+    if today > date(today.year, 6, 19):
+        return (today - date(today.year + 1, 6, 19)).days
+    return (date(today.year, 6, 19) - today).days
 
 
 def render_from_accepting_new_input(state, display):
