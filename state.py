@@ -18,6 +18,9 @@ class ErrorType(enum.Enum):
     FloorNotAvailable = 1
     EntryNotUnderstood = 2
     CannotAllocateCarAtThisTime = 3
+    Floor0Error = 4
+    Floor13Error = 5
+
 
 
 class ElevatorArrival:

@@ -69,9 +69,12 @@ def transition_to_accepting_new_input(state):
 
 
 def get_selection_error(selection):
-    if int(selection) > 32:
+    if int(selection) > 40:
         return ErrorType.FloorNotAvailable
-
+    if int(selection) == 0:
+        return ErrorType.Floor0Error
+    if int(selection) == 13:
+        return ErrorType.Floor13Error
     return None
 
 
@@ -153,6 +156,15 @@ def update_from_showing_error(state):
         transition_to_accepting_new_input(state)
 
 
+def type_of_bath_today():
+    weekday = date.today().weekday()
+    if weekday == 0 or weekday == 6:
+        return "D"
+    if weekday == 2 or weekday == 4:
+        return "M"
+    return "N"
+
+
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
@@ -161,10 +173,14 @@ def render_from_showing_about_screen(state, display):
     line3 = Assets.font.render("Current date:  " + str(date.today()), True, (255, 255, 255))
     line4 = Assets.font.render("Days until Rowan's next birthday:  " + str(days_until_rowans_next_birthday()), True,
                                (255, 255, 255))
+
+    line5 = Assets.font.render("Type of bath scheduled for today:  " + str(type_of_bath_today()), True,
+                               (255, 255, 255))
     display.blit(line1, (100, 100))
     display.blit(line2, (100, 200))
     display.blit(line3, (100, 300))
     display.blit(line4, (100, 400))
+    display.blit(line5, (100, 500))
 
 
 def days_until_rowans_next_birthday():
@@ -330,7 +346,17 @@ def render_from_showing_error(state, display):
             Assets.entry_not_understood_sound.play()
             state.showing_error_context["ENTRY_NOT_UNDERSTOOD_SOUND"] = 1
 
-        text1 = Assets.font.render("Floor Not Available", True, (255, 255, 255))
+        text1 = Assets.font.render("Entry not understood!", True, (255, 255, 255))
+        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        display.blit(text1, (500, 200))
+        display.blit(text2, (500, 300))
+
+    if state.error_type == ErrorType.Floor0Error or state.error_type == ErrorType.Floor13Error:
+        if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
+            Assets.floor_not_available_sound.play()
+            state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
+
+        text1 = Assets.font.render("Floor Not Available!", True, (255, 255, 255))
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
