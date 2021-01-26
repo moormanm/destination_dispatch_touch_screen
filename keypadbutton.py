@@ -45,7 +45,7 @@ class KeypadButton(pygame.sprite.Sprite):
         else:
             self.image = self.unpressed_image
         if self.was_depressed:
-            if state.in_handicap_mode:
+            if state.in_handicap_mode and self.button_id != '-':
                 self.handicap_sound.play()
             else:
                 Assets.beep_sound.play()

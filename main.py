@@ -68,8 +68,18 @@ def transition_to_accepting_new_input(state):
     state.state_type = StateType.AcceptingNewInput
 
 
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
 def get_selection_error(selection):
-    if int(selection) > 40:
+    if not is_int(selection):
+        return ErrorType.FloorNotAvailable
+    if abs(int(selection)) > 40:
         return ErrorType.FloorNotAvailable
     if int(selection) == 0:
         return ErrorType.Floor0Error
@@ -105,7 +115,7 @@ def update_from_appending_input(state):
             if keypad_button.was_depressed:
                 state.floor_selection_buffer = state.floor_selection_buffer + keypad_button.button_id
 
-    if len(state.floor_selection_buffer) < 2:
+    if len(state.floor_selection_buffer) < (3 if state.floor_selection_buffer.startswith("-") and state.floor_selection_buffer.count("-") == 1 else 2):
         return
 
     selection_error = get_selection_error(state.floor_selection_buffer)
@@ -266,7 +276,7 @@ def render_from_directing_to_floor(state, display):
         state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
 
     if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000 and state.in_handicap_mode:
-        Assets.floor_sounds.get(str(int(state.floor_selection_buffer))).play()
+        Assets.floor_sounds.get(str(abs(int(state.floor_selection_buffer)))).play()
         state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
 
     if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900 and state.in_handicap_mode:

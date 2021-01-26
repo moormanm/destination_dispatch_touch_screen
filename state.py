@@ -113,4 +113,8 @@ def init_keypad_sprites():
     y_idx = 3
     ret.add(KeypadButton("0", x_origin + x_space * x_idx, y_origin + y_space * y_idx))
 
+    x_idx = 0
+    y_idx = 3
+    ret.add(KeypadButton("-", x_origin + x_space * x_idx, y_origin + y_space * y_idx))
+
     return ret
