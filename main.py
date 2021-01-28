@@ -168,9 +168,9 @@ def update_from_showing_error(state):
 
 def type_of_bath_today():
     weekday = date.today().weekday()
-    if weekday == 0 or weekday == 6:
+    if weekday == 5 or weekday == 6:
         return "D"
-    if weekday == 2 or weekday == 4:
+    if weekday == 1 or weekday == 3:
         return "M"
     return "N"
 
