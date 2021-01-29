@@ -115,7 +115,8 @@ def update_from_appending_input(state):
             if keypad_button.was_depressed:
                 state.floor_selection_buffer = state.floor_selection_buffer + keypad_button.button_id
 
-    if len(state.floor_selection_buffer) < (3 if state.floor_selection_buffer.startswith("-") and state.floor_selection_buffer.count("-") == 1 else 2):
+    if len(state.floor_selection_buffer) < (
+    3 if state.floor_selection_buffer.startswith("-") and state.floor_selection_buffer.count("-") == 1 else 2):
         return
 
     selection_error = get_selection_error(state.floor_selection_buffer)
@@ -175,6 +176,17 @@ def type_of_bath_today():
     return "N"
 
 
+def type_of_ceremony_today():
+    weekday = date.today().weekday()
+    if weekday == 0:
+        return "7S"
+
+    if weekday % 2 == 0:
+        return "S"
+
+    return "MBP"
+
+
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
@@ -186,11 +198,15 @@ def render_from_showing_about_screen(state, display):
 
     line5 = Assets.font.render("Type of bath scheduled for today:  " + str(type_of_bath_today()), True,
                                (255, 255, 255))
-    display.blit(line1, (100, 100))
-    display.blit(line2, (100, 200))
-    display.blit(line3, (100, 300))
-    display.blit(line4, (100, 400))
-    display.blit(line5, (100, 500))
+
+    line6 = Assets.font.render("Type of ceremony scheduled for today:  " + str(type_of_ceremony_today()), True,
+                               (255, 255, 255))
+    display.blit(line1, (100, 80))
+    display.blit(line2, (100, 80 * 2))
+    display.blit(line3, (100, 80 * 3))
+    display.blit(line4, (100, 80 * 4))
+    display.blit(line5, (100, 80 * 5))
+    display.blit(line6, (100, 80 * 6))
 
 
 def days_until_rowans_next_birthday():
