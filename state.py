@@ -2,6 +2,8 @@ import enum
 import pygame
 
 from aboutbutton import AboutButton
+from destination_button import DestinationButton
+from choose_floors_button import ChooseFloorsButton
 from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
 
@@ -12,6 +14,7 @@ class StateType(enum.Enum):
     DirectingToFloor = 3
     ShowingError = 4
     ShowingAboutScreen = 5
+    ShowingDestinationButtonsScreen = 6
 
 
 class ErrorType(enum.Enum):
@@ -20,7 +23,6 @@ class ErrorType(enum.Enum):
     CannotAllocateCarAtThisTime = 3
     Floor0Error = 4
     Floor13Error = 5
-
 
 
 class ElevatorArrival:
@@ -32,13 +34,33 @@ class ElevatorArrival:
 
 def init_handicap_button():
     ret = pygame.sprite.Group()
-    ret.add(HandicapButton(550, 100))
+    ret.add(HandicapButton(650, 100))
     return ret
+
 
 def init_about_button():
     ret = pygame.sprite.Group()
-    ret.add(AboutButton(940, 520))
+    ret.add(AboutButton(930, 510))
     return ret
+
+
+def init_choose_floors_button():
+    ret = pygame.sprite.Group()
+    ret.add(ChooseFloorsButton(650, 510, 240, 60, "Choose Floors"))
+    return ret
+
+
+def init_more_floors_button():
+    ret = pygame.sprite.Group()
+    ret.add(ChooseFloorsButton(630, 410, 60, 60, ">"))
+    return ret
+
+
+def init_back_to_keypad_button():
+    ret = pygame.sprite.Group()
+    ret.add(ChooseFloorsButton(680, 510, 190, 60, "Keypad"))
+    return ret
+
 
 class State:
     def __init__(self):
@@ -49,6 +71,10 @@ class State:
         self.keypad_sprites = init_keypad_sprites()
         self.handicap_button_group = init_handicap_button()
         self.about_button_group = init_about_button()
+        self.choose_floors_button_group = init_choose_floors_button()
+        self.more_floors_button_group = init_more_floors_button()
+        self.back_to_keypad_button_group = init_back_to_keypad_button()
+        self.destination_buttons_group = init_destination_buttons()
         self.events = []
         self.appending_input_start_millis = 0
         self.directing_to_floor_start_millis = 0
@@ -61,6 +87,7 @@ class State:
         self.in_handicap_mode = False
         self.elevator_arrivals = []
         self.in_about_mode = False
+        self.showing_about_start_time = 0
 
 
 class Direction(enum.Enum):
@@ -69,6 +96,32 @@ class Direction(enum.Enum):
     Back = 2
     BackLeft = 3
     BackRight = 4
+
+
+all_button_ids = [x for x in range(-40, 41, 1) if x != -13 and x != 13 and x != 0]
+
+
+def translate_button_id(sequential_id):
+    return all_button_ids[sequential_id]
+
+
+def init_destination_buttons():
+    ret = pygame.sprite.Group()
+    x_origin = 50
+    y_origin = 50
+    x_space = 90
+    y_space = 55
+
+    for y in range(0, 9):
+        for x in range(0, 6):
+            button_id = (6 * y) + x
+            if button_id > 77:
+                continue
+
+            ret.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
+                                      y_origin + (y_space * y)))
+
+    return ret
 
 
 def init_keypad_sprites():

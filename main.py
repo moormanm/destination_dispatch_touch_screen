@@ -16,6 +16,9 @@ def update_from_about_screen(state):
 
 def update_from_accepting_new_input(state):
     update_handicap_button_state(state)
+    if update_floor_selection_button_state(state):
+        transition_to_choose_floor_screen(state)
+        return
     if update_about_button_state(state):
         transition_to_showing_about_screen(state)
         return
@@ -96,8 +99,16 @@ def get_direction_of_car(car):
     return Direction(ord(car) % len(Direction))
 
 
+def transition_to_choose_floor_screen(state):
+    state.state_type = StateType.ShowingDestinationButtonsScreen
+
+
 def update_from_appending_input(state):
     update_handicap_button_state(state)
+    if update_floor_selection_button_state(state):
+        transition_to_choose_floor_screen(state)
+        return
+
     if millis() - state.appending_input_start_millis > 5000:
         selection_error = get_selection_error(state.floor_selection_buffer)
         if selection_error is None:
@@ -116,7 +127,7 @@ def update_from_appending_input(state):
                 state.floor_selection_buffer = state.floor_selection_buffer + keypad_button.button_id
 
     if len(state.floor_selection_buffer) < (
-    3 if state.floor_selection_buffer.startswith("-") and state.floor_selection_buffer.count("-") == 1 else 2):
+            3 if state.floor_selection_buffer.startswith("-") and state.floor_selection_buffer.count("-") == 1 else 2):
         return
 
     selection_error = get_selection_error(state.floor_selection_buffer)
@@ -150,6 +161,20 @@ def update_about_button_state(state):
         about_button.handle_event(event)
         about_button.update(state)
         if about_button.was_depressed:
+            return True
+
+    return False
+
+
+def update_floor_selection_button_state(state):
+    floor_selection_button = None
+    for hc in state.choose_floors_button_group:
+        floor_selection_button = hc
+
+    for event in state.events:
+        floor_selection_button.handle_event(event)
+        floor_selection_button.update(state)
+        if floor_selection_button.was_depressed:
             return True
 
     return False
@@ -221,6 +246,7 @@ def render_from_accepting_new_input(state, display):
     render_bg(display)
     state.keypad_sprites.draw(display)
     state.handicap_button_group.draw(display)
+    state.choose_floors_button_group.draw(display)
     state.about_button_group.draw(display)
 
 
@@ -230,6 +256,7 @@ def render_from_appending_input(state, display):
     state.keypad_sprites.draw(display)
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
+    state.choose_floors_button_group.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
     display.blit(text, (500, 300))
 
@@ -256,10 +283,6 @@ def image_of_direction(direction_of_car):
 
 def sound_of_direction(direction_of_car):
     return direction_to_sound.get(direction_of_car)
-
-
-def play_arrival_sound(car):
-    pass
 
 
 def render_arrivals(state):
@@ -388,12 +411,55 @@ def render_from_showing_error(state, display):
         display.blit(text2, (500, 300))
 
 
+def render_from_showing_destination_buttons_screen(state, display):
+    render_arrivals(state)
+    render_bg(display)
+    state.destination_buttons_group.draw(display)
+    state.handicap_button_group.draw(display)
+    state.about_button_group.draw(display)
+    state.more_floors_button_group.draw(display)
+    state.back_to_keypad_button_group.draw(display)
+
+
+def update_from_showing_destination_buttons_screen(state):
+    update_handicap_button_state(state)
+    if update_about_button_state(state):
+        transition_to_showing_about_screen(state)
+        return
+
+    more_floors_button = None
+    for hc in state.more_floors_button_group:
+        more_floors_button = hc
+
+    back_to_keypad_button = None
+    for hc in state.back_to_keypad_button_group:
+        back_to_keypad_button = hc
+
+    for event in state.events:
+        for destination_button in state.destination_buttons_group:
+            destination_button.handle_event(event)
+            destination_button.update(state)
+            if destination_button.was_depressed:
+                pass
+
+            more_floors_button.handle_event(event)
+            more_floors_button.update(state)
+            if more_floors_button.was_depressed:
+                pass
+
+            back_to_keypad_button.handle_event(event)
+            back_to_keypad_button.update(state)
+            if back_to_keypad_button.was_depressed:
+                pass
+
+
 update_funcs = {
     StateType.AcceptingNewInput: update_from_accepting_new_input,
     StateType.AppendingInput: update_from_appending_input,
     StateType.DirectingToFloor: update_from_directing_to_floor,
     StateType.ShowingError: update_from_showing_error,
-    StateType.ShowingAboutScreen: update_from_about_screen
+    StateType.ShowingAboutScreen: update_from_about_screen,
+    StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen
 }
 
 
@@ -406,7 +472,8 @@ render_funcs = {
     StateType.AppendingInput: render_from_appending_input,
     StateType.DirectingToFloor: render_from_directing_to_floor,
     StateType.ShowingError: render_from_showing_error,
-    StateType.ShowingAboutScreen: render_from_showing_about_screen
+    StateType.ShowingAboutScreen: render_from_showing_about_screen,
+    StateType.ShowingDestinationButtonsScreen: render_from_showing_destination_buttons_screen
 }
 
 
@@ -447,6 +514,5 @@ def render_bg(display):
     display.blit(Assets.bg, (0, 0))
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
