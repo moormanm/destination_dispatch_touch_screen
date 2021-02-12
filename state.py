@@ -74,7 +74,9 @@ class State:
         self.choose_floors_button_group = init_choose_floors_button()
         self.more_floors_button_group = init_more_floors_button()
         self.back_to_keypad_button_group = init_back_to_keypad_button()
-        self.destination_buttons_group = init_destination_buttons()
+        self.active_destination_buttons_group_idx = 0
+
+        self.destination_button_groups = init_destination_buttons()
         self.events = []
         self.appending_input_start_millis = 0
         self.directing_to_floor_start_millis = 0
@@ -106,22 +108,36 @@ def translate_button_id(sequential_id):
 
 
 def init_destination_buttons():
-    ret = pygame.sprite.Group()
+    group1 = pygame.sprite.Group()
+    group2 = pygame.sprite.Group()
     x_origin = 50
     y_origin = 50
     x_space = 90
     y_space = 55
 
-    for y in range(0, 9):
-        for x in range(0, 6):
-            button_id = (6 * y) + x
+    columns = 6
+    rows = 9
+    for y in range(0, rows):
+        for x in range(0, columns):
+            button_id = (columns * y) + x
             if button_id > 77:
                 continue
 
-            ret.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
+            group1.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
                                       y_origin + (y_space * y)))
 
-    return ret
+    for y in range(0, rows):
+        for x in range(0, columns):
+            button_id = (columns * y) + x
+            button_id += rows * columns
+            if button_id > 77:
+                continue
+
+            group2.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
+                                      y_origin + (y_space * y)))
+
+
+    return [group1, group2]
 
 
 def init_keypad_sprites():

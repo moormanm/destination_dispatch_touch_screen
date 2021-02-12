@@ -101,6 +101,7 @@ def get_direction_of_car(car):
 
 def transition_to_choose_floor_screen(state):
     state.state_type = StateType.ShowingDestinationButtonsScreen
+    state.active_destination_buttons_group_idx = 0
 
 
 def update_from_appending_input(state):
@@ -315,7 +316,7 @@ def render_from_directing_to_floor(state, display):
         state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
 
     if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000 and state.in_handicap_mode:
-        Assets.floor_sounds.get(str(abs(int(state.floor_selection_buffer)))).play()
+        Assets.floor_sounds.get(str(abs(int(state.selected_floor)))).play()
         state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
 
     if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900 and state.in_handicap_mode:
@@ -414,7 +415,7 @@ def render_from_showing_error(state, display):
 def render_from_showing_destination_buttons_screen(state, display):
     render_arrivals(state)
     render_bg(display)
-    state.destination_buttons_group.draw(display)
+    state.destination_button_groups[state.active_destination_buttons_group_idx].draw(display)
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
     state.more_floors_button_group.draw(display)
@@ -436,21 +437,23 @@ def update_from_showing_destination_buttons_screen(state):
         back_to_keypad_button = hc
 
     for event in state.events:
-        for destination_button in state.destination_buttons_group:
+        for destination_button in state.destination_button_groups[state.active_destination_buttons_group_idx]:
             destination_button.handle_event(event)
             destination_button.update(state)
             if destination_button.was_depressed:
-                pass
+                car = random_car()
+                transition_to_directing_to_floor(state, destination_button.button_id, car, get_direction_of_car(car))
+                return
 
             more_floors_button.handle_event(event)
             more_floors_button.update(state)
             if more_floors_button.was_depressed:
-                pass
-
+                state.active_destination_buttons_group_idx = (state.active_destination_buttons_group_idx + 1) % len(state.destination_button_groups)
             back_to_keypad_button.handle_event(event)
             back_to_keypad_button.update(state)
             if back_to_keypad_button.was_depressed:
-                pass
+                transition_to_accepting_new_input(state)
+                return
 
 
 update_funcs = {
@@ -506,6 +509,7 @@ def main():
         render_state(state, display)
         pygame.display.flip()
         time.sleep(1 / 6)
+
 
     pygame.quit()
 
