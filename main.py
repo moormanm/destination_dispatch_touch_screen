@@ -288,7 +288,7 @@ def sound_of_direction(direction_of_car):
 
 def render_arrivals(state):
     for arrival in state.elevator_arrivals:
-        t = millis() - arrival.arrives_at;
+        t = millis() - arrival.arrives_at
         if t < 0:
             continue
 

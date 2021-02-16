@@ -24,6 +24,7 @@ class Assets:
     about_button_pressed = pygame.transform.scale(pygame.image.load('assets/about_button_pressed.png'), (60, 60))
     about_button_unpressed = pygame.transform.scale(pygame.image.load('assets/about_button_unpressed.png'), (60, 60))
 
+
     keypad_sounds = {
         '0': pygame.mixer.Sound('assets/0.wav'),
         '1': pygame.mixer.Sound('assets/1.wav'),
@@ -39,6 +40,8 @@ class Assets:
 
     floor_sounds = {str(floor_number): pygame.mixer.Sound('assets/' + str(floor_number) + '.wav') for floor_number in
                     range(0, 40 + 1)}
+
+    minus_sound = pygame.mixer.Sound('assets/minus.wav')
 
     car_sounds = {chr(id): pygame.mixer.Sound('assets/' + chr(id) + '.wav') for id in range(ord('A'), ord('Z') + 1)}
 
