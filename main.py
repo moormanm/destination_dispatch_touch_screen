@@ -60,7 +60,7 @@ def transition_to_directing_to_floor(state, selected_floor, selected_car, direct
     state.selected_car = selected_car
     state.selected_floor = selected_floor
     state.direction_of_car = direction_of_car
-    state.directing_to_floor_context = {}
+    state.directing_to_floor_context = {"delay_sound_until": 1200 + millis()}
     arrival = ElevatorArrival()
     arrival.car = selected_car
     arrival.arrives_at = millis() + 10000
@@ -311,25 +311,8 @@ def render_arrivals(state):
 
 def render_from_directing_to_floor(state, display):
     render_arrivals(state)
-    if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 1200 and state.in_handicap_mode:
-        Assets.floor_sound.play()
-        state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
 
-    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2000 and state.in_handicap_mode:
-        Assets.floor_sounds.get(str(abs(int(state.selected_floor)))).play()
-        state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
-
-    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 2900 and state.in_handicap_mode:
-        Assets.proceed_to_car_sound.play()
-        state.directing_to_floor_context["STARTED_PROCEED_TO_CAR_SOUND"] = 1
-
-    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4000 and state.in_handicap_mode:
-        Assets.car_sounds.get(state.selected_car).play()
-        state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
-
-    if "STARTED_DIRECTIONAL_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4500 and state.in_handicap_mode:
-        sound_of_direction(state.direction_of_car).play()
-        state.directing_to_floor_context["STARTED_DIRECTIONAL_SOUND"] = 1
+    render_direct_to_floor_sounds(state)
 
     render_bg(display)
     text = Assets.big_font.render("FOLLOW INSTRUCTIONS BELOW", True, (255, 255, 255))
@@ -381,6 +364,49 @@ def render_from_directing_to_floor(state, display):
     dir_img = image_of_direction(state.direction_of_car).convert_alpha()
 
     display.blit(dir_img, (1024 / 2 - (dir_img.get_width() / 2), 230))
+
+
+def render_direct_to_floor_sounds(state):
+    if state.directing_to_floor_context["delay_sound_until"] > millis():
+        return
+
+    if not state.in_handicap_mode:
+        return
+
+    if "STARTED_FLOOR_SOUND" not in state.directing_to_floor_context:
+        Assets.floor_sound.play()
+        state.directing_to_floor_context["STARTED_FLOOR_SOUND"] = 1
+        state.directing_to_floor_context["delay_sound_until"] = millis() + 800
+        return
+
+    if "STARTED_MINUS_SOUND" not in state.directing_to_floor_context and int(state.selected_floor) < 0:
+        Assets.minus_sound.play()
+        state.directing_to_floor_context["STARTED_MINUS_SOUND"] = 1
+        state.directing_to_floor_context["delay_sound_until"] = millis() + 600
+        return
+
+    if "STARTED_FLOOR_NUMBER_SOUND" not in state.directing_to_floor_context:
+        Assets.floor_sounds.get(str(abs(int(state.selected_floor)))).play()
+        state.directing_to_floor_context["STARTED_FLOOR_NUMBER_SOUND"] = 1
+        state.directing_to_floor_context["delay_sound_until"] = millis() + 900
+        return
+
+    if "STARTED_PROCEED_TO_CAR_SOUND" not in state.directing_to_floor_context:
+        Assets.proceed_to_car_sound.play()
+        state.directing_to_floor_context["STARTED_PROCEED_TO_CAR_SOUND"] = 1
+        state.directing_to_floor_context["delay_sound_until"] = millis() + 1100
+        return
+
+    if "STARTED_CAR_SOUND" not in state.directing_to_floor_context:
+        Assets.car_sounds.get(state.selected_car).play()
+        state.directing_to_floor_context["STARTED_CAR_SOUND"] = 1
+        state.directing_to_floor_context["delay_sound_until"] = millis() + 500
+        return
+
+    if "STARTED_DIRECTIONAL_SOUND" not in state.directing_to_floor_context and millis() - state.directing_to_floor_start_millis > 4500 and state.in_handicap_mode:
+        sound_of_direction(state.direction_of_car).play()
+        state.directing_to_floor_context["STARTED_DIRECTIONAL_SOUND"] = 1
+        return
 
 
 def convert_alpha(img):
@@ -448,7 +474,8 @@ def update_from_showing_destination_buttons_screen(state):
             more_floors_button.handle_event(event)
             more_floors_button.update(state)
             if more_floors_button.was_depressed:
-                state.active_destination_buttons_group_idx = (state.active_destination_buttons_group_idx + 1) % len(state.destination_button_groups)
+                state.active_destination_buttons_group_idx = (state.active_destination_buttons_group_idx + 1) % len(
+                    state.destination_button_groups)
             back_to_keypad_button.handle_event(event)
             back_to_keypad_button.update(state)
             if back_to_keypad_button.was_depressed:
@@ -509,7 +536,6 @@ def main():
         render_state(state, display)
         pygame.display.flip()
         time.sleep(1 / 6)
-
 
     pygame.quit()
 
