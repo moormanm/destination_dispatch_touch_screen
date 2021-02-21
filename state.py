@@ -7,7 +7,6 @@ from choose_floors_button import ChooseFloorsButton
 from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
 
-
 class StateType(enum.Enum):
     AcceptingNewInput = 1
     AppendingInput = 2

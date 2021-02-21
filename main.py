@@ -7,6 +7,32 @@ from assets import Assets
 import time
 from os import environ
 import random
+import sqlite3
+from os.path import expanduser
+
+home = expanduser("~")
+
+
+def setup_db():
+    stmt = 'CREATE TABLE IF NOT EXISTS call_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, floor_number INTEGER, car_id TEXT, successful INTEGER);'
+    conn.execute(stmt)
+
+
+def tally_call(floor_number, car_id, is_successful):
+    stmt = "INSERT INTO call_stats(floor_number, car_id, successful) VALUES (?, ?, ?)"
+    conn.execute(stmt, (floor_number, car_id, 1 if is_successful else 0))
+
+
+def get_call_stats():
+    successful_calls_stmt = 'SELECT COUNT(*) from call_stats where successful = 1'
+    unsuccessful_calls_stmt = 'SELECT COUNT(*) from call_stats where successful = 0'
+    successful_calls = conn.execute(successful_calls_stmt).fetchone()[0]
+    unsuccessful_calls = conn.execute(unsuccessful_calls_stmt).fetchone()[0]
+    return successful_calls, unsuccessful_calls
+
+
+conn = sqlite3.connect(home + '/destination-dispatch.db')
+setup_db()
 
 
 def update_from_about_screen(state):
@@ -47,6 +73,7 @@ def transition_to_showing_error(state, error_type):
     state.showing_error_start_millis = millis()
     state.error_type = error_type
     state.showing_error_context = {}
+    tally_call(state.floor_selection_buffer, None, False)
 
 
 def transition_to_showing_about_screen(state):
@@ -65,6 +92,7 @@ def transition_to_directing_to_floor(state, selected_floor, selected_car, direct
     arrival.car = selected_car
     arrival.arrives_at = millis() + 10000
     state.elevator_arrivals.append(arrival)
+    tally_call(selected_floor, selected_car, True)
 
 
 def transition_to_accepting_new_input(state):
@@ -216,6 +244,9 @@ def type_of_ceremony_today():
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
+
+    call_stats = get_call_stats()
+
     line1 = Assets.font.render("Authors: Rowan Moorman and Michael Mooorman", True, (255, 255, 255))
     line2 = Assets.font.render("Created date:  2021-01-21", True, (255, 255, 255))
     line3 = Assets.font.render("Current date:  " + str(date.today()), True, (255, 255, 255))
@@ -227,12 +258,21 @@ def render_from_showing_about_screen(state, display):
 
     line6 = Assets.font.render("Type of ceremony scheduled for today:  " + str(type_of_ceremony_today()), True,
                                (255, 255, 255))
-    display.blit(line1, (100, 80))
-    display.blit(line2, (100, 80 * 2))
-    display.blit(line3, (100, 80 * 3))
-    display.blit(line4, (100, 80 * 4))
-    display.blit(line5, (100, 80 * 5))
-    display.blit(line6, (100, 80 * 6))
+
+    line7 = Assets.font.render("Successful calls : " + str(call_stats[0]), True,
+                               (255, 255, 255))
+    line8 = Assets.font.render("Failed calls : " + str(call_stats[1]), True,
+                               (255, 255, 255))
+    vpad = 70
+    start = 20
+    display.blit(line1, (100, start + vpad * 0 ))
+    display.blit(line2, (100, start + vpad * 1))
+    display.blit(line3, (100, start + vpad * 2))
+    display.blit(line4, (100, start + vpad * 3))
+    display.blit(line5, (100, start + vpad * 4))
+    display.blit(line6, (100, start + vpad * 5))
+    display.blit(line7, (100, start + vpad * 6))
+    display.blit(line8, (100, start + vpad * 7))
 
 
 def days_until_rowans_next_birthday():
