@@ -7,6 +7,7 @@ from choose_floors_button import ChooseFloorsButton
 from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
 
+
 class StateType(enum.Enum):
     AcceptingNewInput = 1
     AppendingInput = 2
@@ -14,6 +15,7 @@ class StateType(enum.Enum):
     ShowingError = 4
     ShowingAboutScreen = 5
     ShowingDestinationButtonsScreen = 6
+    ShowingStatsScreen = 7
 
 
 class ErrorType(enum.Enum):
@@ -40,6 +42,12 @@ def init_handicap_button():
 def init_about_button():
     ret = pygame.sprite.Group()
     ret.add(AboutButton(930, 510))
+    return ret
+
+
+def init_stats_button():
+    ret = pygame.sprite.Group()
+    ret.add(DestinationButton("Stats", 830, 490))
     return ret
 
 
@@ -70,6 +78,7 @@ class State:
         self.keypad_sprites = init_keypad_sprites()
         self.handicap_button_group = init_handicap_button()
         self.about_button_group = init_about_button()
+        self.stats_button_group = init_stats_button()
         self.choose_floors_button_group = init_choose_floors_button()
         self.more_floors_button_group = init_more_floors_button()
         self.back_to_keypad_button_group = init_back_to_keypad_button()
@@ -87,7 +96,7 @@ class State:
         self.direction_of_car = None
         self.in_handicap_mode = False
         self.elevator_arrivals = []
-        self.in_about_mode = False
+
         self.showing_about_start_time = 0
 
 
@@ -123,7 +132,7 @@ def init_destination_buttons():
                 continue
 
             group1.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
-                                      y_origin + (y_space * y)))
+                                         y_origin + (y_space * y)))
 
     for y in range(0, rows):
         for x in range(0, columns):
@@ -133,8 +142,7 @@ def init_destination_buttons():
                 continue
 
             group2.add(DestinationButton(str(translate_button_id(button_id)), x_origin + (x_space * x),
-                                      y_origin + (y_space * y)))
-
+                                         y_origin + (y_space * y)))
 
     return [group1, group2]
 
