@@ -31,6 +31,7 @@ def get_call_stats():
     unsuccessful_calls = conn.execute(unsuccessful_calls_stmt).fetchone()[0]
     return successful_calls, unsuccessful_calls
 
+
 def get_call_stats_by_floor():
     sql = 'SELECT floor_number, COUNT(*) from call_stats group by floor_number order by floor_number'
     results = conn.execute(sql).fetchall()
@@ -38,7 +39,7 @@ def get_call_stats_by_floor():
 
 
 def get_call_stats_by_car():
-    sql = 'SELECT car_id, COUNT(*) from call_stats group by car_id order by car_id'
+    sql = 'SELECT car_id, COUNT(*) from call_stats where car_id is not null group by car_id order by car_id'
     results = conn.execute(sql).fetchall()
     return {x[0]: x[1] for x in results}
 
@@ -49,7 +50,8 @@ setup_db()
 
 def update_from_about_screen(state):
     if update_stats_button_state(state):
-        pass
+        transition_to_showing_stats_screen(state)
+        return
 
     if millis() - state.showing_about_start_time > 8000:
         transition_to_accepting_new_input(state)
@@ -94,6 +96,11 @@ def transition_to_showing_error(state, error_type):
 def transition_to_showing_about_screen(state):
     state.state_type = StateType.ShowingAboutScreen
     state.showing_about_start_time = millis()
+
+
+def transition_to_showing_stats_screen(state):
+    state.state_type = StateType.ShowingStatsScreen
+    state.showing_stats_start_time = millis()
 
 
 def transition_to_directing_to_floor(state, selected_floor, selected_car, direction_of_car):
@@ -268,6 +275,35 @@ def type_of_ceremony_today():
         return "S"
 
     return "MBP"
+
+
+def render_from_showing_stats_screen(state, display):
+    render_bg(display)
+    floor_call_stats = get_call_stats_by_floor()
+    car_call_stats = get_call_stats_by_car()
+    i = 0
+    vpad = 30
+    start = 100
+
+    floor_stats_line = Assets.font.render("Floor Stats", True, (255, 255, 255))
+    car_stats_line = Assets.font.render("Car Stats", True, (255, 255, 255))
+
+    display.blit(floor_stats_line,  (100, 30))
+
+    for floor in floor_call_stats:
+        count = floor_call_stats[floor]
+        line = Assets.little_font.render(str(floor) + " : " + str(count), True, (255, 255, 255))
+        display.blit(line, (100, start + vpad * i))
+        i = i + 1
+
+    display.blit(car_stats_line, (600, 30))
+    i = 0
+
+    for car in car_call_stats:
+        count = car_call_stats[car]
+        line = Assets.little_font.render(str(car) + " : " + str(count), True, (255, 255, 255))
+        display.blit(line, (600, start + vpad * i))
+        i = i + 1
 
 
 def render_from_showing_about_screen(state, display):
@@ -507,9 +543,6 @@ def render_from_showing_error(state, display):
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
-def render_from_showing_stats_screen(state, display):
-    pass
-
 
 def render_from_showing_destination_buttons_screen(state, display):
     render_arrivals(state)
@@ -556,13 +589,19 @@ def update_from_showing_destination_buttons_screen(state):
                 return
 
 
+def update_from_stats_screen(state):
+    if millis() - state.showing_stats_start_time > 8000:
+        transition_to_accepting_new_input(state)
+
+
 update_funcs = {
     StateType.AcceptingNewInput: update_from_accepting_new_input,
     StateType.AppendingInput: update_from_appending_input,
     StateType.DirectingToFloor: update_from_directing_to_floor,
     StateType.ShowingError: update_from_showing_error,
     StateType.ShowingAboutScreen: update_from_about_screen,
-    StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen
+    StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen,
+    StateType.ShowingStatsScreen: update_from_stats_screen
 }
 
 
