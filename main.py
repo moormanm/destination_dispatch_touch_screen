@@ -2,7 +2,7 @@ import string
 from datetime import date
 
 import pygame
-from state import State, StateType, ErrorType, Direction, ElevatorArrival
+from state import State, StateType, ErrorType, Direction, ElevatorArrival, StatsType
 from assets import Assets
 import time
 from os import environ
@@ -11,6 +11,15 @@ import sqlite3
 from os.path import expanduser
 
 home = expanduser("~")
+
+
+def stub_data():
+    for i in range(-99, 99):
+        for c in range(ord('A'), ord('Z') + 1):
+            car_id = chr(c)
+            floor_id = i
+            tally_call(floor_id, car_id, True)
+            tally_call(floor_id, car_id, False)
 
 
 def setup_db():
@@ -49,10 +58,13 @@ setup_db()
 
 
 def update_from_about_screen(state):
-    if update_stats_button_state(state):
-        transition_to_showing_stats_screen(state)
+    if update_car_stats_button_state(state):
+        transition_to_showing_stats_screen(state, StatsType.Car)
         return
 
+    if update_floor_stats_button_state(state):
+        transition_to_showing_stats_screen(state, StatsType.Floor)
+        return
     if millis() - state.showing_about_start_time > 8000:
         transition_to_accepting_new_input(state)
 
@@ -98,9 +110,10 @@ def transition_to_showing_about_screen(state):
     state.showing_about_start_time = millis()
 
 
-def transition_to_showing_stats_screen(state):
+def transition_to_showing_stats_screen(state, stats_type):
     state.state_type = StateType.ShowingStatsScreen
     state.showing_stats_start_time = millis()
+    state.stats_type = stats_type
 
 
 def transition_to_directing_to_floor(state, selected_floor, selected_car, direction_of_car):
@@ -217,9 +230,23 @@ def update_about_button_state(state):
     return False
 
 
-def update_stats_button_state(state):
+def update_car_stats_button_state(state):
     stats_button = None
-    for hc in state.stats_button_group:
+    for hc in state.car_stats_button_group:
+        stats_button = hc
+
+    for event in state.events:
+        stats_button.handle_event(event)
+        stats_button.update(state)
+        if stats_button.was_depressed:
+            return True
+
+    return False
+
+
+def update_floor_stats_button_state(state):
+    stats_button = None
+    for hc in state.floor_stats_button_group:
         stats_button = hc
 
     for event in state.events:
@@ -277,39 +304,62 @@ def type_of_ceremony_today():
     return "MBP"
 
 
-def render_from_showing_stats_screen(state, display):
-    render_bg(display)
+def render_floor_stats(display):
     floor_call_stats = get_call_stats_by_floor()
-    car_call_stats = get_call_stats_by_car()
     i = 0
-    vpad = 30
-    start = 100
+    v_pad = 26
+    start_y = 50
 
     floor_stats_line = Assets.font.render("Floor Stats", True, (255, 255, 255))
-    car_stats_line = Assets.font.render("Car Stats", True, (255, 255, 255))
 
-    display.blit(floor_stats_line,  (100, 30))
+    start_x = 20
+    display.blit(floor_stats_line, (start_x, 10))
 
     for floor in floor_call_stats:
         count = floor_call_stats[floor]
         line = Assets.little_font.render(str(floor) + " : " + str(count), True, (255, 255, 255))
-        display.blit(line, (100, start + vpad * i))
+        display.blit(line, (start_x, start_y + v_pad * i))
         i = i + 1
+        if i == 20:
+            i = 0
+            start_x += 100
 
-    display.blit(car_stats_line, (600, 30))
+
+def render_car_stats(display):
+    car_call_stats = get_call_stats_by_car()
     i = 0
+    v_pad = 26
+    start_y = 50
+
+    floor_stats_line = Assets.font.render("Car Stats", True, (255, 255, 255))
+
+    start_x = 20
+    display.blit(floor_stats_line, (start_x, 10))
 
     for car in car_call_stats:
         count = car_call_stats[car]
         line = Assets.little_font.render(str(car) + " : " + str(count), True, (255, 255, 255))
-        display.blit(line, (600, start + vpad * i))
+        display.blit(line, (start_x, start_y + v_pad * i))
         i = i + 1
+        if i == 20:
+            i = 0
+            start_x += 100
+
+
+def render_from_showing_stats_screen(state, display):
+    render_bg(display)
+    if state.stats_type == StatsType.Floor:
+        render_floor_stats(display)
+    else:
+        render_car_stats(display)
+
 
 
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
-    state.stats_button_group.draw(display)
+    state.floor_stats_button_group.draw(display)
+    state.car_stats_button_group.draw(display)
 
     call_stats = get_call_stats()
 
@@ -661,8 +711,6 @@ if __name__ == '__main__':
     main()
 
 
-def render_from_showing_stats_screen(state, display):
-    pass
 
 
 def render_from_showing_destination_buttons_screen(state, display):

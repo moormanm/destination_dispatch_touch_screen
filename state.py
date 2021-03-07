@@ -18,6 +18,11 @@ class StateType(enum.Enum):
     ShowingStatsScreen = 7
 
 
+class StatsType(enum.Enum):
+    Car = 1
+    Floor = 2
+
+
 class ErrorType(enum.Enum):
     FloorNotAvailable = 1
     EntryNotUnderstood = 2
@@ -45,9 +50,15 @@ def init_about_button():
     return ret
 
 
-def init_stats_button():
+def init_floor_stats_button():
     ret = pygame.sprite.Group()
-    ret.add(DestinationButton("Stats", 830, 490))
+    ret.add(DestinationButton("F Stats", 670, 490, width=110))
+    return ret
+
+
+def init_car_stats_button():
+    ret = pygame.sprite.Group()
+    ret.add(DestinationButton("C Stats", 830, 490, width=110))
     return ret
 
 
@@ -78,7 +89,8 @@ class State:
         self.keypad_sprites = init_keypad_sprites()
         self.handicap_button_group = init_handicap_button()
         self.about_button_group = init_about_button()
-        self.stats_button_group = init_stats_button()
+        self.floor_stats_button_group = init_floor_stats_button()
+        self.car_stats_button_group = init_car_stats_button()
         self.choose_floors_button_group = init_choose_floors_button()
         self.more_floors_button_group = init_more_floors_button()
         self.back_to_keypad_button_group = init_back_to_keypad_button()

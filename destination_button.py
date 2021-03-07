@@ -6,11 +6,11 @@ from choose_floors_button import make_filled_rounded_rect
 
 
 class DestinationButton(pygame.sprite.Sprite):
-    def __init__(self, button_id, x, y):
+    def __init__(self, button_id, x, y, width=80, height=40):
         pygame.sprite.Sprite.__init__(self)
         self.button_id = button_id
-        self.pressed_image = make_filled_rounded_rect(Rect(0, 0, 80, 40), (150, 150, 150), .4)
-        self.unpressed_image = make_filled_rounded_rect(Rect(0, 0, 80, 40), (240, 240, 240), .4)
+        self.pressed_image = make_filled_rounded_rect(Rect(0, 0, width, height), (150, 150, 150), .4)
+        self.unpressed_image = make_filled_rounded_rect(Rect(0, 0, width, height), (240, 240, 240), .4)
         self.image = self.unpressed_image
         self.rect = self.image.get_rect()
         self.rect.x = x
