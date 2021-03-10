@@ -328,8 +328,8 @@ def render_floor_stats(display):
 def render_car_stats(display):
     car_call_stats = get_call_stats_by_car()
     i = 0
-    v_pad = 26
-    start_y = 50
+    v_pad = 60
+    start_y = 70
 
     floor_stats_line = Assets.font.render("Car Stats", True, (255, 255, 255))
 
@@ -338,12 +338,12 @@ def render_car_stats(display):
 
     for car in car_call_stats:
         count = car_call_stats[car]
-        line = Assets.little_font.render(str(car) + " : " + str(count), True, (255, 255, 255))
+        line = Assets.font.render(str(car) + " : " + str(count), True, (255, 255, 255))
         display.blit(line, (start_x, start_y + v_pad * i))
         i = i + 1
-        if i == 20:
+        if i == 6:
             i = 0
-            start_x += 100
+            start_x += 200
 
 
 def render_from_showing_stats_screen(state, display):
