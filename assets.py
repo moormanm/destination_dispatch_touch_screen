@@ -2,7 +2,7 @@ import pygame
 
 pygame.font.init()
 pygame.mixer.init()
-
+import datetime as dt
 
 class Assets:
     button_pressed = pygame.transform.scale(pygame.image.load('assets/button_pressed.png'), (100, 100))
@@ -11,7 +11,7 @@ class Assets:
     little_font = pygame.font.SysFont('Sans', 16)
     big_font = pygame.font.SysFont('Sans', 42)
     beep_sound = pygame.mixer.Sound("assets/beep.wav")
-    bg = pygame.image.load('assets/bg.png')
+    bg = pygame.image.load('assets/bg-day.png') if dt.datetime.now().hour >= 8 and dt.datetime.now().hour <= (12 + 6) else pygame.image.load('assets/bg.png')
     dir_l = pygame.image.load('assets/l.png')
     dir_r = pygame.image.load('assets/r.png')
     dir_d = pygame.image.load('assets/d.png')
