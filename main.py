@@ -154,7 +154,16 @@ def get_selection_error(selection):
     return None
 
 
-def random_car():
+def pick_car(floor_num):
+    if floor_num == 11:
+        return "G"
+    if floor_num == 8:
+        return "Z"
+    if floor_num == 5:
+        return "M"
+    if floor_num == 7:
+        return "N"
+
     return random.choice(string.ascii_uppercase)
 
 
@@ -176,7 +185,7 @@ def update_from_appending_input(state):
     if millis() - state.appending_input_start_millis > 5000:
         selection_error = get_selection_error(state.floor_selection_buffer)
         if selection_error is None:
-            car = random_car()
+            car = pick_car(int(state.floor_selection_buffer))
             transition_to_directing_to_floor(state, state.floor_selection_buffer, car, get_direction_of_car(car[0]))
 
         else:
@@ -196,7 +205,7 @@ def update_from_appending_input(state):
 
     selection_error = get_selection_error(state.floor_selection_buffer)
     if selection_error is None:
-        car = random_car()
+        car = pick_car(int(state.floor_selection_buffer))
         transition_to_directing_to_floor(state, state.floor_selection_buffer, car, get_direction_of_car(car))
     else:
         transition_to_showing_error(state, selection_error)
@@ -623,7 +632,7 @@ def update_from_showing_destination_buttons_screen(state):
             destination_button.handle_event(event)
             destination_button.update(state)
             if destination_button.was_depressed:
-                car = random_car()
+                car = pick_car(int(destination_button.button_id))
                 transition_to_directing_to_floor(state, destination_button.button_id, car, get_direction_of_car(car))
                 return
 
@@ -742,7 +751,7 @@ def update_from_showing_destination_buttons_screen(state):
             destination_button.handle_event(event)
             destination_button.update(state)
             if destination_button.was_depressed:
-                car = random_car()
+                car = pick_car(int(destination_button.button_id))
                 transition_to_directing_to_floor(state, destination_button.button_id, car, get_direction_of_car(car))
                 return
 
