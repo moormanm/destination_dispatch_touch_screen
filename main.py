@@ -151,6 +151,8 @@ def get_selection_error(selection):
         return ErrorType.Floor0Error
     if int(selection) == 13:
         return ErrorType.Floor13Error
+    if int(selection) == -13:
+        return ErrorType.Floor13Error
     return None
 
 
@@ -163,6 +165,18 @@ def pick_car(floor_num):
         return "M"
     if floor_num == 7:
         return "N"
+
+    if floor_num == 3:
+        return "P"
+
+    if floor_num == 14:
+        return random.choice(["P", "U"])
+
+    if floor_num == 1:
+        return "R"
+
+    if floor_num == 12:
+        return "U"
 
     return random.choice(string.ascii_uppercase)
 
@@ -592,13 +606,27 @@ def render_from_showing_error(state, display):
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
-    if state.error_type == ErrorType.Floor0Error or state.error_type == ErrorType.Floor13Error:
+    if state.error_type == ErrorType.Floor13Error:
+        text1 = Assets.font.render("Unlucky floor 13... Who said that?!", True, (255, 255, 255))
+        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
+            Assets.floor_13_error_sound.play()
+            state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
+        display.blit(text1, (500, 200))
+        display.blit(text2, (500, 300))
+
+    if state.error_type == ErrorType.Floor0Error:
         if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
             Assets.floor_not_available_sound.play()
             state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
 
         text1 = Assets.font.render("Floor Not Available!", True, (255, 255, 255))
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        if state.error_type == ErrorType.Floor13Error:
+            text1 = Assets.font.render("That is an unlucky floor!", True, (255, 255, 255))
+            text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+
+
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
