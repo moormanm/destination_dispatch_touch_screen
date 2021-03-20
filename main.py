@@ -1,3 +1,4 @@
+import datetime
 import string
 from datetime import date
 
@@ -377,7 +378,6 @@ def render_from_showing_stats_screen(state, display):
         render_car_stats(display)
 
 
-
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
@@ -595,23 +595,28 @@ def convert_alpha(img):
 def render_from_showing_error(state, display):
     render_arrivals(state)
     render_bg(display)
+    font_color = (255, 255, 255) if is_night_mode() else (0, 0, 0)
+
     if state.error_type == ErrorType.FloorNotAvailable:
 
         if "ENTRY_NOT_UNDERSTOOD_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
             Assets.entry_not_understood_sound.play()
             state.showing_error_context["ENTRY_NOT_UNDERSTOOD_SOUND"] = 1
 
-        text1 = Assets.font.render("Entry not understood!", True, (255, 255, 255))
-        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        text1 = Assets.font.render("Entry not understood!", True, font_color)
+        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, font_color)
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
     if state.error_type == ErrorType.Floor13Error:
-        text1 = Assets.font.render("Unlucky floor 13... Who said that?!", True, (255, 255, 255))
-        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
+        text1 = Assets.font.render("Unlucky floor 13... Who said that?!", True, font_color)
+        text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, font_color)
         if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
             Assets.floor_13_error_sound.play()
             state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
+
+        display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))
+
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
@@ -625,7 +630,6 @@ def render_from_showing_error(state, display):
         if state.error_type == ErrorType.Floor13Error:
             text1 = Assets.font.render("That is an unlucky floor!", True, (255, 255, 255))
             text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, (255, 255, 255))
-
 
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
@@ -740,14 +744,21 @@ def main():
     pygame.quit()
 
 
+def is_night_mode():
+    return not is_day_mode()
+
+
+def is_day_mode():
+    return 8 <= datetime.datetime.now().hour <= (12 + 6)
+
+
 def render_bg(display):
-    display.blit(Assets.bg, (0, 0))
+    bg = Assets.day_time_bg if is_day_mode() else Assets.night_time_bg
+    display.blit(bg, (0, 0))
 
 
 if __name__ == '__main__':
     main()
-
-
 
 
 def render_from_showing_destination_buttons_screen(state, display):
