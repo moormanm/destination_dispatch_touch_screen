@@ -5,7 +5,6 @@ from datetime import date
 import pygame
 from state import State, StateType, ErrorType, Direction, ElevatorArrival, StatsType
 from assets import Assets
-import time
 from os import environ
 import random
 import sqlite3
