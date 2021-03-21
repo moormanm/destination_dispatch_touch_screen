@@ -89,7 +89,7 @@ def update_from_accepting_new_input(state):
 
 
 def millis():
-    return int(round(time.time() * 1000))
+    return pygame.time.get_ticks()
 
 
 def transition_to_appending_input(state, selected_key):
@@ -727,7 +727,7 @@ def main():
         display = pygame.display.set_mode((1024, 600))
 
     state = State()
-
+    clock = pygame.time.Clock()
     run = True
     while run:
         state.events = pygame.event.get()
@@ -739,7 +739,7 @@ def main():
         update_state(state)
         render_state(state, display)
         pygame.display.flip()
-        time.sleep(1 / 6)
+        clock.tick(6)
 
     pygame.quit()
 
@@ -755,117 +755,6 @@ def is_day_mode():
 def render_bg(display):
     bg = Assets.day_time_bg if is_day_mode() else Assets.night_time_bg
     display.blit(bg, (0, 0))
-
-
-if __name__ == '__main__':
-    main()
-
-
-def render_from_showing_destination_buttons_screen(state, display):
-    render_arrivals(state)
-    render_bg(display)
-    state.destination_button_groups[state.active_destination_buttons_group_idx].draw(display)
-    state.handicap_button_group.draw(display)
-    state.about_button_group.draw(display)
-    state.more_floors_button_group.draw(display)
-    state.back_to_keypad_button_group.draw(display)
-
-
-def update_from_showing_destination_buttons_screen(state):
-    update_handicap_button_state(state)
-    if update_about_button_state(state):
-        transition_to_showing_about_screen(state)
-        return
-
-    more_floors_button = None
-    for hc in state.more_floors_button_group:
-        more_floors_button = hc
-
-    back_to_keypad_button = None
-    for hc in state.back_to_keypad_button_group:
-        back_to_keypad_button = hc
-
-    for event in state.events:
-        for destination_button in state.destination_button_groups[state.active_destination_buttons_group_idx]:
-            destination_button.handle_event(event)
-            destination_button.update(state)
-            if destination_button.was_depressed:
-                car = pick_car(int(destination_button.button_id))
-                transition_to_directing_to_floor(state, destination_button.button_id, car, get_direction_of_car(car))
-                return
-
-            more_floors_button.handle_event(event)
-            more_floors_button.update(state)
-            if more_floors_button.was_depressed:
-                state.active_destination_buttons_group_idx = (state.active_destination_buttons_group_idx + 1) % len(
-                    state.destination_button_groups)
-            back_to_keypad_button.handle_event(event)
-            back_to_keypad_button.update(state)
-            if back_to_keypad_button.was_depressed:
-                transition_to_accepting_new_input(state)
-                return
-
-
-update_funcs = {
-    StateType.AcceptingNewInput: update_from_accepting_new_input,
-    StateType.AppendingInput: update_from_appending_input,
-    StateType.DirectingToFloor: update_from_directing_to_floor,
-    StateType.ShowingError: update_from_showing_error,
-    StateType.ShowingAboutScreen: update_from_about_screen,
-    StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen
-}
-
-
-def update_state(state):
-    update_funcs.get(state.state_type)(state)
-
-
-render_funcs = {
-    StateType.AcceptingNewInput: render_from_accepting_new_input,
-    StateType.AppendingInput: render_from_appending_input,
-    StateType.DirectingToFloor: render_from_directing_to_floor,
-    StateType.ShowingError: render_from_showing_error,
-    StateType.ShowingAboutScreen: render_from_showing_about_screen,
-    StateType.ShowingDestinationButtonsScreen: render_from_showing_destination_buttons_screen,
-    StateType.ShowingStatsScreen: render_from_showing_stats_screen
-}
-
-
-def render_state(state, display):
-    render_funcs.get(state.state_type)(state, display)
-
-
-def main():
-    pygame.init()
-    print(pygame.display.Info().current_w, "x", pygame.display.Info().current_h)
-
-    if environ.get('FULL_SCREEN') is not None:
-        print("Using full screen mode")
-        display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    else:
-        print("Using windowed mode")
-        display = pygame.display.set_mode((1024, 600))
-
-    state = State()
-
-    run = True
-    while run:
-        state.events = pygame.event.get()
-        for event in state.events:
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                run = False
-        update_state(state)
-        render_state(state, display)
-        pygame.display.flip()
-        time.sleep(1 / 6)
-
-    pygame.quit()
-
-
-def render_bg(display):
-    display.blit(Assets.bg, (0, 0))
 
 
 if __name__ == '__main__':
