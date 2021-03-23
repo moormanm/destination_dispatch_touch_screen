@@ -608,10 +608,13 @@ def render_from_showing_error(state, display):
         display.blit(text2, (500, 300))
 
     if state.error_type == ErrorType.Floor13Error:
-        text1 = Assets.font.render("Unlucky floor 13... Who said that?!", True, font_color)
+        text1 = Assets.font.render("Unlucky floor " + state.floor_selection_buffer + "... Who said that?!", True, font_color)
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, font_color)
         if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
-            Assets.floor_13_error_sound.play()
+            if int(state.floor_selection_buffer) == -13:
+                Assets.floor_minus_13_error_sound.play()
+            else:
+                Assets.floor_13_error_sound.play()
             state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
 
         display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))

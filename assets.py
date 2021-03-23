@@ -66,6 +66,7 @@ class Assets:
     entry_not_understood_sound = pygame.mixer.Sound('assets/Entry_not_understood.wav')
     floor_not_available_sound = pygame.mixer.Sound('assets/Floor_not_available.wav')
     floor_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_13._...Who_said_that?.wav')
+    floor_minus_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_minus_13._...Who_said_that?.wav')
 
     @classmethod
     def handicap_sound_for_button(cls, button_id):
