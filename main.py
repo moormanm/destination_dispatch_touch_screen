@@ -618,7 +618,8 @@ def render_from_showing_error(state, display):
             state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
 
         display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))
-
+        numberling_text = Assets.font.render("13", True, font_color)
+        display.blit(numberling_text, (775, 250))
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
