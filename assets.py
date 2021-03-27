@@ -8,6 +8,8 @@ class Assets:
     button_pressed = pygame.transform.scale(pygame.image.load('assets/button_pressed.png'), (100, 100))
     button_unpressed = pygame.transform.scale(pygame.image.load('assets/button_unpressed.png'), (100, 100))
     numberblock_13 = pygame.transform.scale(pygame.image.load('assets/numberblock_13.png'), (207, 300))
+    numberblock_10 = pygame.transform.scale(pygame.image.load('assets/numberblock_10.png'), (183, 250))
+    numberblock_3 = pygame.transform.scale(pygame.image.load('assets/numberblock_3.png'), (117, 250))
     font = pygame.font.SysFont('Sans', 32)
 
     little_font = pygame.font.SysFont('Sans', 16)

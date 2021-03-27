@@ -608,7 +608,8 @@ def render_from_showing_error(state, display):
         display.blit(text2, (500, 300))
 
     if state.error_type == ErrorType.Floor13Error:
-        text1 = Assets.font.render("Unlucky floor " + state.floor_selection_buffer + "... Who said that?!", True, font_color)
+        text1 = Assets.font.render("Unlucky floor " + state.floor_selection_buffer + "... Who said that?!", True,
+                                   font_color)
         text2 = Assets.font.render("Floor " + state.floor_selection_buffer, True, font_color)
         if "FLOOR_NOT_AVAILABLE_SOUND" not in state.showing_error_context and millis() - state.showing_error_start_millis > 1200 and state.in_handicap_mode:
             if int(state.floor_selection_buffer) == -13:
@@ -617,9 +618,15 @@ def render_from_showing_error(state, display):
                 Assets.floor_13_error_sound.play()
             state.showing_error_context["FLOOR_NOT_AVAILABLE_SOUND"] = 1
 
-        display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))
-        numberling_text = Assets.font.render("13", True, font_color)
-        display.blit(numberling_text, (775, 250))
+        thirteen_is_showing = millis() - state.showing_error_start_millis < 2000
+        if thirteen_is_showing:
+            display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))
+            numberling_text = Assets.font.render("13", True, font_color)
+            display.blit(numberling_text, (775, 250))
+        else:
+            display.blit(Assets.numberblock_10.convert_alpha(), (690, 280))
+            display.blit(Assets.numberblock_3.convert_alpha(), (850, 320))
+
         display.blit(text1, (500, 200))
         display.blit(text2, (500, 300))
 
