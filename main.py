@@ -762,9 +762,14 @@ def is_day_mode():
     return 8 <= datetime.datetime.now().hour <= (12 + 6)
 
 
+easter_days = [datetime.date(2021, 4, 3), datetime.date(2021, 4, 4)]
+
+
 def render_bg(display):
     bg = Assets.day_time_bg if is_day_mode() else Assets.night_time_bg
     display.blit(bg, (0, 0))
+    if datetime.datetime.today().date() in easter_days:
+        display.blit(Assets.easter_bunny.convert_alpha(), (330, 270))
 
 
 if __name__ == '__main__':
