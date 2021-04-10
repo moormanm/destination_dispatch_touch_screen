@@ -543,6 +543,23 @@ def render_from_directing_to_floor(state, display):
 
     display.blit(dir_img, (1024 / 2 - (dir_img.get_width() / 2), 230))
 
+    if int(state.floor_selection_buffer) == 26:
+        thirteen_is_showing = millis() - state.directing_to_floor_start_millis < 3500
+        if thirteen_is_showing:
+            display.blit(Assets.numberblock_13.convert_alpha(), (720, 280))
+            display.blit(Assets.numberblock_13.convert_alpha(), (720 - 600, 280))
+            numberling_text = Assets.font.render("13", True, (0, 0, 0))
+            display.blit(numberling_text, (775, 250))
+            display.blit(numberling_text, (775 - 600, 250))
+        else:
+            display.blit(Assets.numberblock_10.convert_alpha(), (690, 280))
+            display.blit(Assets.numberblock_3.convert_alpha(), (850, 320))
+            display.blit(Assets.numberblock_10.convert_alpha(), (690 - 600, 280))
+            display.blit(Assets.numberblock_3.convert_alpha(), (850 - 600, 320))
+
+
+
+
 
 def render_direct_to_floor_sounds(state):
     if state.directing_to_floor_context["delay_sound_until"] > millis():
