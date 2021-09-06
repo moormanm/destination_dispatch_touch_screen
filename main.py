@@ -1,15 +1,19 @@
 import datetime
 import string
 from datetime import date
-
-import pygame
+import thorpy.elements.slider
+from elements.checker import Checker
+from pygame.surface import Surface
+import lightning_mode
 from state import State, StateType, ErrorType, Direction, ElevatorArrival, StatsType
 from assets import Assets
 from os import environ
 import random
 import sqlite3
 from os.path import expanduser
+import pygame
 
+frame_rate = 30
 home = expanduser("~")
 
 
@@ -77,6 +81,10 @@ def update_from_accepting_new_input(state):
     if update_about_button_state(state):
         transition_to_showing_about_screen(state)
         return
+    if update_lightning_mode_button_state(state):
+        transition_to_showing_lightning_maze_screen(state)
+        return
+
 
     for event in state.events:
         for keypad_button in state.keypad_sprites:
@@ -114,6 +122,73 @@ def transition_to_showing_stats_screen(state, stats_type):
     state.state_type = StateType.ShowingStatsScreen
     state.showing_stats_start_time = millis()
     state.stats_type = stats_type
+
+
+def transition_to_showing_lightning_maze_screen(state: State):
+    state.state_type = StateType.ShowingLightningMazeScreen
+    state.lightning_mode_state = lightning_mode.LightningModeState()
+    state.lightning_mode_is_paused = False
+
+    def restart_func():
+        previous_showing_numbers = state.lightning_mode_state.show_numbers
+        transition_to_showing_lightning_maze_screen(state)
+        state.lightning_mode_show_numbers_checkbox.set_value(previous_showing_numbers)
+
+    def quit_func():
+        transition_to_accepting_new_input(state)
+
+    def pause_func():
+        state.lightning_mode_is_paused = not state.lightning_mode_is_paused
+        state.lightning_mode_pause_play_button.set_text("Play" if state.lightning_mode_is_paused else "Pause")
+        state.lightning_mode_time_slider.set_active(state.lightning_mode_is_paused)
+
+    state.lightning_mode_restart_button = thorpy.make_button("Restart",
+                                                             func=restart_func
+                                                             )
+
+    state.lightning_mode_quit_button = thorpy.make_button("Quit",
+                                                          func=quit_func
+                                                          )
+
+    state.lightning_mode_show_numbers_checkbox = Checker(text="Show Numbers", value=False, type_="checkbox")
+
+
+
+    state.lightning_mode_show_numbers_checkbox._name_element.set_font_color((255,255,255))
+    state.lightning_mode_show_numbers_checkbox._name_element.set_font(Assets.little_font)
+    state.lightning_mode_show_numbers_checkbox.set_topleft((115, 140))
+    bottom_part_y = 500
+    state.lightning_mode_restart_button.set_topleft((30, bottom_part_y))
+    state.lightning_mode_quit_button.set_topleft((100, bottom_part_y))
+    state.lightning_mode_pause_play_button = thorpy.make_button("Pause", func=pause_func)
+    state.lightning_mode_pause_play_button.set_topleft((75, 280))
+    state.lightning_mode_time_slider = thorpy.SliderX(length=150,
+                                                      limvals=(0, state.lightning_mode_state.final_step),
+                                                      text='',
+                                                      type_=int)
+    state.lightning_mode_time_slider.set_topleft((10, 200))
+    state.lightning_mode_time_slider.get_slider().set_size((150, 30))
+    state.lightning_mode_time_slider.get_dragger().set_size((15, 50))
+
+    state.lightning_mode_time_slider._value_element.set_visible(False)
+
+    state.lightning_mode_time_slider.set_active(False)
+
+    def slider_react_func_pause(event, state: State):
+        if event.el == state.lightning_mode_time_slider and event.id == thorpy.constants.EVENT_SLIDE:
+            state.lightning_mode_state.current_step = state.lightning_mode_time_slider.get_value()
+
+    slider_reaction_pause = thorpy.Reaction(
+        reacts_to=thorpy.constants.THORPY_EVENT,
+        reac_func=slider_react_func_pause,
+        params={'state': state}
+    )
+
+    state.lightning_mode_time_slider.add_reactions([slider_reaction_pause])
+    state.thorpy_base_menu.set_elements(
+        [state.lightning_mode_time_slider, state.lightning_mode_pause_play_button, state.lightning_mode_restart_button,
+         state.lightning_mode_quit_button, state.lightning_mode_show_numbers_checkbox])
+    state.thorpy_base_menu.refresh()
 
 
 def transition_to_directing_to_floor(state, selected_floor, selected_car, direction_of_car):
@@ -252,6 +327,19 @@ def update_about_button_state(state):
 
     return False
 
+def update_lightning_mode_button_state(state):
+    btn = None
+    for hc in state.lightning_mode_button_group:
+        btn = hc
+
+    for event in state.events:
+        btn.handle_event(event)
+        btn.update(state)
+        if btn.was_depressed:
+            return True
+
+    return False
+
 
 def update_car_stats_button_state(state):
     stats_button = None
@@ -377,6 +465,20 @@ def render_from_showing_stats_screen(state, display):
         render_car_stats(display)
 
 
+def render_from_showing_lightning_screen(state: State, display):
+    render_bg(display)
+    surface = Surface((800, 580))
+    lightning_mode.draw_current_step(state.lightning_mode_state, surface)
+    state.lightning_mode_time_slider.blit()
+    state.lightning_mode_pause_play_button.blit()
+    state.lightning_mode_quit_button.blit()
+    state.lightning_mode_restart_button.blit()
+    state.lightning_mode_show_numbers_checkbox.blit()
+
+    display.blit(Assets.lightning_mode_step_number_line, (20, 180))
+    display.blit(surface, (200, 10))
+
+
 def render_from_showing_about_screen(state, display):
     render_arrivals(state)
     render_bg(display)
@@ -416,8 +518,8 @@ def render_from_showing_about_screen(state, display):
 def days_until_rowans_next_birthday():
     today = date.today()
     if today > date(today.year, 6, 19):
-        return (today - date(today.year + 1, 6, 19)).days
-    return (date(today.year, 6, 19) - today).days
+        return abs((today - date(today.year + 1, 6, 19)).days)
+    return abs((date(today.year, 6, 19) - today).days)
 
 
 def render_from_accepting_new_input(state, display):
@@ -427,6 +529,7 @@ def render_from_accepting_new_input(state, display):
     state.handicap_button_group.draw(display)
     state.choose_floors_button_group.draw(display)
     state.about_button_group.draw(display)
+    state.lightning_mode_button_group.draw(display)
 
 
 def render_from_appending_input(state, display):
@@ -435,6 +538,7 @@ def render_from_appending_input(state, display):
     state.keypad_sprites.draw(display)
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
+    state.lightning_mode_button_group.draw(display)
     state.choose_floors_button_group.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
     display.blit(text, (500, 300))
@@ -558,9 +662,6 @@ def render_from_directing_to_floor(state, display):
             display.blit(Assets.numberblock_3.convert_alpha(), (850 - 600, 320))
 
 
-
-
-
 def render_direct_to_floor_sounds(state):
     if state.directing_to_floor_context["delay_sound_until"] > millis():
         return
@@ -668,6 +769,7 @@ def render_from_showing_destination_buttons_screen(state, display):
     state.destination_button_groups[state.active_destination_buttons_group_idx].draw(display)
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
+    state.lightning_mode_button_group.draw(display)
     state.more_floors_button_group.draw(display)
     state.back_to_keypad_button_group.draw(display)
 
@@ -677,7 +779,9 @@ def update_from_showing_destination_buttons_screen(state):
     if update_about_button_state(state):
         transition_to_showing_about_screen(state)
         return
-
+    if update_lightning_mode_button_state(state):
+        transition_to_showing_lightning_maze_screen(state)
+        return
     more_floors_button = None
     for hc in state.more_floors_button_group:
         more_floors_button = hc
@@ -712,6 +816,18 @@ def update_from_stats_screen(state):
         transition_to_accepting_new_input(state)
 
 
+def update_from_showing_lightning_screen(state: State):
+    state.lightning_mode_state.show_numbers = state.lightning_mode_show_numbers_checkbox.get_value()
+    state.lightning_mode_time_slider.get_slider().set_text(str(state.lightning_mode_state.current_step))
+    if not state.lightning_mode_is_paused:
+        state.lightning_mode_time_slider.set_value(state.lightning_mode_state.current_step)
+
+    if state.lightning_mode_state.endRequested:
+        transition_to_accepting_new_input(state)
+    if not state.lightning_mode_is_paused and not state.lightning_mode_state.tick():
+        transition_to_showing_lightning_maze_screen(state)
+
+
 update_funcs = {
     StateType.AcceptingNewInput: update_from_accepting_new_input,
     StateType.AppendingInput: update_from_appending_input,
@@ -719,7 +835,8 @@ update_funcs = {
     StateType.ShowingError: update_from_showing_error,
     StateType.ShowingAboutScreen: update_from_about_screen,
     StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen,
-    StateType.ShowingStatsScreen: update_from_stats_screen
+    StateType.ShowingStatsScreen: update_from_stats_screen,
+    StateType.ShowingLightningMazeScreen: update_from_showing_lightning_screen
 }
 
 
@@ -734,7 +851,8 @@ render_funcs = {
     StateType.ShowingError: render_from_showing_error,
     StateType.ShowingAboutScreen: render_from_showing_about_screen,
     StateType.ShowingDestinationButtonsScreen: render_from_showing_destination_buttons_screen,
-    StateType.ShowingStatsScreen: render_from_showing_stats_screen
+    StateType.ShowingStatsScreen: render_from_showing_stats_screen,
+    StateType.ShowingLightningMazeScreen: render_from_showing_lightning_screen
 }
 
 
@@ -753,7 +871,7 @@ def main():
         print("Using windowed mode")
         display = pygame.display.set_mode((1024, 600))
 
-    state = State()
+    state = State(display)
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -763,10 +881,11 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 run = False
+            state.thorpy_base_menu.react(event)
         update_state(state)
         render_state(state, display)
         pygame.display.flip()
-        clock.tick(6)
+        clock.tick(frame_rate)
 
     pygame.quit()
 
@@ -776,7 +895,8 @@ def is_night_mode():
 
 
 def is_day_mode():
-    return 8 <= datetime.datetime.now().hour <= (12 + 6)
+    # return 8 <= datetime.datetime.now().hour <= (12 + 6)
+    return False
 
 
 easter_days = [datetime.date(2021, 4, 3), datetime.date(2021, 4, 4)]

@@ -5,6 +5,7 @@ pygame.mixer.init()
 
 
 class Assets:
+
     button_pressed = pygame.transform.scale(pygame.image.load('assets/button_pressed.png'), (100, 100))
     button_unpressed = pygame.transform.scale(pygame.image.load('assets/button_unpressed.png'), (100, 100))
     numberblock_13 = pygame.transform.scale(pygame.image.load('assets/numberblock_13.png'), (207, 300))
@@ -32,6 +33,9 @@ class Assets:
 
     about_button_pressed = pygame.transform.scale(pygame.image.load('assets/about_button_pressed.png'), (60, 60))
     about_button_unpressed = pygame.transform.scale(pygame.image.load('assets/about_button_unpressed.png'), (60, 60))
+
+    button_lightning_pressed = pygame.transform.scale(pygame.image.load('assets/lightning.png'), (60, 60))
+    button_lightning_unpressed = pygame.transform.scale(pygame.image.load('assets/lightning.png'), (60, 60))
 
     keypad_sounds = {
         '0': pygame.mixer.Sound('assets/0.wav'),
@@ -68,9 +72,9 @@ class Assets:
 
     entry_not_understood_sound = pygame.mixer.Sound('assets/Entry_not_understood.wav')
     floor_not_available_sound = pygame.mixer.Sound('assets/Floor_not_available.wav')
-    floor_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_13._...Who_said_that?.wav')
-    floor_minus_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_minus_13._...Who_said_that?.wav')
-
+    floor_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_13_who_said_that.wav')
+    floor_minus_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_minus_13_who_said_that.wav')
+    lightning_mode_step_number_line = little_font.render("Step Number", True, (255, 255, 255))
     @classmethod
     def handicap_sound_for_button(cls, button_id):
         return Assets.keypad_sounds.get(button_id)

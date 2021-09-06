@@ -1,11 +1,18 @@
 import enum
-import pygame
 
-from aboutbutton import AboutButton
+import pygame
+import thorpy
+from elements.slidersetter import SliderXSetter
+
+from thorpy import Clickable, Checker
+
+from pressablebutton import PressableButton
+from assets import Assets
 from destination_button import DestinationButton
 from choose_floors_button import ChooseFloorsButton
 from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
+from lightning_mode import LightningModeState
 
 
 class StateType(enum.Enum):
@@ -16,6 +23,7 @@ class StateType(enum.Enum):
     ShowingAboutScreen = 5
     ShowingDestinationButtonsScreen = 6
     ShowingStatsScreen = 7
+    ShowingLightningMazeScreen = 8
 
 
 class StatsType(enum.Enum):
@@ -46,7 +54,12 @@ def init_handicap_button():
 
 def init_about_button():
     ret = pygame.sprite.Group()
-    ret.add(AboutButton(930, 510))
+    ret.add(PressableButton(930, 510))
+    return ret
+
+def init_lightning_mode_button():
+    ret = pygame.sprite.Group()
+    ret.add(PressableButton(930, 430, Assets.button_lightning_pressed, Assets.button_lightning_unpressed))
     return ret
 
 
@@ -81,7 +94,7 @@ def init_back_to_keypad_button():
 
 
 class State:
-    def __init__(self):
+    def __init__(self, display):
         self.run = True
         self.state_type = StateType.AcceptingNewInput
         self.floor_selection_buffer = ""
@@ -89,13 +102,13 @@ class State:
         self.keypad_sprites = init_keypad_sprites()
         self.handicap_button_group = init_handicap_button()
         self.about_button_group = init_about_button()
+        self.lightning_mode_button_group = init_lightning_mode_button()
         self.floor_stats_button_group = init_floor_stats_button()
         self.car_stats_button_group = init_car_stats_button()
         self.choose_floors_button_group = init_choose_floors_button()
         self.more_floors_button_group = init_more_floors_button()
         self.back_to_keypad_button_group = init_back_to_keypad_button()
         self.active_destination_buttons_group_idx = 0
-
         self.destination_button_groups = init_destination_buttons()
         self.events = []
         self.appending_input_start_millis = 0
@@ -108,8 +121,16 @@ class State:
         self.direction_of_car = None
         self.in_handicap_mode = False
         self.elevator_arrivals = []
-
         self.showing_about_start_time = 0
+        self.lightning_mode_state: LightningModeState = None
+        self.lightning_mode_pause_play_button : Clickable = None
+        self.lightning_mode_restart_button: Clickable = None
+        self.lightning_mode_time_slider: SliderXSetter = None
+        self.lightning_mode_show_numbers_checkbox : Checker = None
+        self.lightning_mode_is_paused = False
+        self.lightning_mode_quit_button = None
+        self.thorpy_base_menu = thorpy.Menu()
+
 
 
 class Direction(enum.Enum):
