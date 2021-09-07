@@ -85,7 +85,6 @@ def update_from_accepting_new_input(state):
         transition_to_showing_lightning_maze_screen(state)
         return
 
-
     for event in state.events:
         for keypad_button in state.keypad_sprites:
             keypad_button.handle_event(event)
@@ -126,68 +125,66 @@ def transition_to_showing_stats_screen(state, stats_type):
 
 def transition_to_showing_lightning_maze_screen(state: State):
     state.state_type = StateType.ShowingLightningMazeScreen
-    state.lightning_mode_state = lightning_mode.LightningModeState()
+    state.lightning_mode_state = lightning_mode.LightningModeState(
+        search_all_paths=state.lightning_mode_widgets.search_all_paths_checkbox.get_value())
     state.lightning_mode_is_paused = False
 
     def restart_func():
-        previous_showing_numbers = state.lightning_mode_state.show_numbers
         transition_to_showing_lightning_maze_screen(state)
-        state.lightning_mode_show_numbers_checkbox.set_value(previous_showing_numbers)
 
     def quit_func():
         transition_to_accepting_new_input(state)
 
     def pause_func():
         state.lightning_mode_is_paused = not state.lightning_mode_is_paused
-        state.lightning_mode_pause_play_button.set_text("Play" if state.lightning_mode_is_paused else "Pause")
-        state.lightning_mode_time_slider.set_active(state.lightning_mode_is_paused)
+        state.lightning_mode_widgets.pause_play_button.set_text("Play" if state.lightning_mode_is_paused else "Pause")
+        state.lightning_mode_widgets.time_slider.set_active(state.lightning_mode_is_paused)
 
-    state.lightning_mode_restart_button = thorpy.make_button("Restart",
-                                                             func=restart_func
-                                                             )
+    state.lightning_mode_widgets.enable_sound_checkbox.set_topleft((115, 80))
+    state.lightning_mode_widgets.search_all_paths_checkbox.set_topleft((115, 110))
+    state.lightning_mode_widgets.show_numbers_checkbox.set_topleft((115, 140))
+    state.lightning_mode_widgets.restart_button = thorpy.make_button("Restart", func=restart_func)
+    state.lightning_mode_widgets.quit_button = thorpy.make_button("Quit", func=quit_func)
+    state.lightning_mode_widgets.pause_play_button = thorpy.make_button("Pause", func=pause_func)
 
-    state.lightning_mode_quit_button = thorpy.make_button("Quit",
-                                                          func=quit_func
-                                                          )
+    state.lightning_mode_widgets.show_numbers_checkbox._name_element.set_font_color((255, 255, 255))
+    state.lightning_mode_widgets.show_numbers_checkbox._name_element.set_font(Assets.little_font)
+    state.lightning_mode_widgets.search_all_paths_checkbox._name_element.set_font_color((255, 255, 255))
+    state.lightning_mode_widgets.search_all_paths_checkbox._name_element.set_font(Assets.little_font)
+    state.lightning_mode_widgets.enable_sound_checkbox._name_element.set_font_color((255, 255, 255))
+    state.lightning_mode_widgets.enable_sound_checkbox._name_element.set_font(Assets.little_font)
 
-    state.lightning_mode_show_numbers_checkbox = Checker(text="Show Numbers", value=False, type_="checkbox")
-
-
-
-    state.lightning_mode_show_numbers_checkbox._name_element.set_font_color((255,255,255))
-    state.lightning_mode_show_numbers_checkbox._name_element.set_font(Assets.little_font)
-    state.lightning_mode_show_numbers_checkbox.set_topleft((115, 140))
     bottom_part_y = 500
-    state.lightning_mode_restart_button.set_topleft((30, bottom_part_y))
-    state.lightning_mode_quit_button.set_topleft((100, bottom_part_y))
-    state.lightning_mode_pause_play_button = thorpy.make_button("Pause", func=pause_func)
-    state.lightning_mode_pause_play_button.set_topleft((75, 280))
-    state.lightning_mode_time_slider = thorpy.SliderX(length=150,
+    state.lightning_mode_widgets.restart_button.set_topleft((30, bottom_part_y))
+    state.lightning_mode_widgets.quit_button.set_topleft((100, bottom_part_y))
+
+    state.lightning_mode_widgets.pause_play_button.set_topleft((75, 280))
+    state.lightning_mode_widgets.time_slider = thorpy.SliderX(length=150,
                                                       limvals=(0, state.lightning_mode_state.final_step),
                                                       text='',
                                                       type_=int)
-    state.lightning_mode_time_slider.set_topleft((10, 200))
-    state.lightning_mode_time_slider.get_slider().set_size((150, 30))
-    state.lightning_mode_time_slider.get_dragger().set_size((15, 50))
+    state.lightning_mode_widgets.time_slider.set_topleft((10, 200))
+    state.lightning_mode_widgets.time_slider.get_slider().set_size((150, 30))
+    state.lightning_mode_widgets.time_slider.get_dragger().set_size((15, 50))
 
-    state.lightning_mode_time_slider._value_element.set_visible(False)
+    state.lightning_mode_widgets.time_slider._value_element.set_visible(False)
 
-    state.lightning_mode_time_slider.set_active(False)
+    state.lightning_mode_widgets.time_slider.set_active(False)
 
     def slider_react_func_pause(event, state: State):
-        if event.el == state.lightning_mode_time_slider and event.id == thorpy.constants.EVENT_SLIDE:
-            state.lightning_mode_state.current_step = state.lightning_mode_time_slider.get_value()
+        if event.el == state.lightning_mode_widgets.time_slider and event.id == thorpy.constants.EVENT_SLIDE:
+            state.lightning_mode_state.current_step = state.lightning_mode_widgets.time_slider.get_value()
 
     slider_reaction_pause = thorpy.Reaction(
         reacts_to=thorpy.constants.THORPY_EVENT,
         reac_func=slider_react_func_pause,
         params={'state': state}
     )
-
-    state.lightning_mode_time_slider.add_reactions([slider_reaction_pause])
+    state.lightning_mode_widgets.time_slider.add_reactions([slider_reaction_pause])
     state.thorpy_base_menu.set_elements(
-        [state.lightning_mode_time_slider, state.lightning_mode_pause_play_button, state.lightning_mode_restart_button,
-         state.lightning_mode_quit_button, state.lightning_mode_show_numbers_checkbox])
+        state.lightning_mode_widgets.static_widgets + [state.lightning_mode_widgets.restart_button, state.lightning_mode_widgets.quit_button,
+                                                       state.lightning_mode_widgets.pause_play_button,
+                                                       state.lightning_mode_widgets.time_slider])
     state.thorpy_base_menu.refresh()
 
 
@@ -326,6 +323,7 @@ def update_about_button_state(state):
             return True
 
     return False
+
 
 def update_lightning_mode_button_state(state):
     btn = None
@@ -469,12 +467,13 @@ def render_from_showing_lightning_screen(state: State, display):
     render_bg(display)
     surface = Surface((800, 580))
     lightning_mode.draw_current_step(state.lightning_mode_state, surface)
-    state.lightning_mode_time_slider.blit()
-    state.lightning_mode_pause_play_button.blit()
-    state.lightning_mode_quit_button.blit()
-    state.lightning_mode_restart_button.blit()
-    state.lightning_mode_show_numbers_checkbox.blit()
-
+    state.lightning_mode_widgets.time_slider.blit()
+    state.lightning_mode_widgets.pause_play_button.blit()
+    state.lightning_mode_widgets.quit_button.blit()
+    state.lightning_mode_widgets.restart_button.blit()
+    state.lightning_mode_widgets.show_numbers_checkbox.blit()
+    state.lightning_mode_widgets.search_all_paths_checkbox.blit()
+    state.lightning_mode_widgets.enable_sound_checkbox.blit()
     display.blit(Assets.lightning_mode_step_number_line, (20, 180))
     display.blit(surface, (200, 10))
 
@@ -817,10 +816,11 @@ def update_from_stats_screen(state):
 
 
 def update_from_showing_lightning_screen(state: State):
-    state.lightning_mode_state.show_numbers = state.lightning_mode_show_numbers_checkbox.get_value()
-    state.lightning_mode_time_slider.get_slider().set_text(str(state.lightning_mode_state.current_step))
+    state.lightning_mode_state.show_numbers = state.lightning_mode_widgets.show_numbers_checkbox.get_value()
+    state.lightning_mode_widgets.time_slider.get_slider().set_text(str(state.lightning_mode_state.current_step))
+    state.lightning_mode_state.enable_sound = state.lightning_mode_widgets.enable_sound_checkbox.get_value()
     if not state.lightning_mode_is_paused:
-        state.lightning_mode_time_slider.set_value(state.lightning_mode_state.current_step)
+        state.lightning_mode_widgets.time_slider.set_value(state.lightning_mode_state.current_step)
 
     if state.lightning_mode_state.endRequested:
         transition_to_accepting_new_input(state)

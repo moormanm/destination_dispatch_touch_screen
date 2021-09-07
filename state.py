@@ -12,7 +12,7 @@ from destination_button import DestinationButton
 from choose_floors_button import ChooseFloorsButton
 from handicapbutton import HandicapButton
 from keypadbutton import KeypadButton
-from lightning_mode import LightningModeState
+from lightning_mode import LightningModeState, LightningModeWidgets
 
 
 class StateType(enum.Enum):
@@ -56,6 +56,7 @@ def init_about_button():
     ret = pygame.sprite.Group()
     ret.add(PressableButton(930, 510))
     return ret
+
 
 def init_lightning_mode_button():
     ret = pygame.sprite.Group()
@@ -123,12 +124,8 @@ class State:
         self.elevator_arrivals = []
         self.showing_about_start_time = 0
         self.lightning_mode_state: LightningModeState = None
-        self.lightning_mode_pause_play_button : Clickable = None
-        self.lightning_mode_restart_button: Clickable = None
-        self.lightning_mode_time_slider: SliderXSetter = None
-        self.lightning_mode_show_numbers_checkbox : Checker = None
-        self.lightning_mode_is_paused = False
-        self.lightning_mode_quit_button = None
+        self.lightning_mode_widgets: LightningModeWidgets = LightningModeWidgets()
+        self.lightning_mode_is_paused = None
         self.thorpy_base_menu = thorpy.Menu()
 
 
@@ -227,3 +224,5 @@ def init_keypad_sprites():
     ret.add(KeypadButton("-", x_origin + x_space * x_idx, y_origin + y_space * y_idx))
 
     return ret
+
+

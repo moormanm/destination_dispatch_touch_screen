@@ -69,7 +69,7 @@ class Assets:
 
     elevator_sound = pygame.mixer.Sound('assets/Elevator.wav')
     has_arrived_sound = pygame.mixer.Sound('assets/Has_arrived.wav')
-
+    lightning_strike_sound = pygame.mixer.Sound('assets/lightning.wav')
     entry_not_understood_sound = pygame.mixer.Sound('assets/Entry_not_understood.wav')
     floor_not_available_sound = pygame.mixer.Sound('assets/Floor_not_available.wav')
     floor_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_13_who_said_that.wav')

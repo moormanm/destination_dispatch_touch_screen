@@ -5,10 +5,14 @@ from collections import deque
 from dataclasses import dataclass
 
 import pygame
+from elements.slidersetter import SliderXSetter
 from pygame.rect import Rect
 from pygame.surface import Surface
+from thorpy import Clickable, Checker
 
 from assets import Assets
+
+YELLOW = (253, 208, 35)
 
 
 class LightningModeState:
@@ -19,16 +23,17 @@ class LightningModeState:
         self.current_step += 1
         return True
 
-    def __init__(self, columns_count=30, rows_count=20):
+    def __init__(self, columns_count=30, rows_count=20, search_all_paths=False):
         self.rendered_edges = None
         while True:
             self.maze = generate_maze(columns_count, rows_count)
-            self.solution, self.end_pos, self.solution_path = solve_maze(self.maze)
+            self.solution, self.end_pos, self.solution_path = solve_maze(self.maze, search_all_paths)
             if not self.solution:
                 print("Could not solve.. retrying")
                 continue
             break
 
+        self.enable_sound = True
         self.show_numbers = True
         self.show_frontier_lightning = True
         self.show_lightning_strike = True
@@ -46,7 +51,7 @@ class Maze:
     vertical_edges: []
 
 
-def solve_maze(maze):
+def solve_maze(maze, search_all_paths):
     solution = [
         [
             0 for _ in range(len(maze.horizontal_edges[0]))
@@ -85,7 +90,8 @@ def solve_maze(maze):
             solved = True
             solution_path = previous_coords
             end_pos = (pos_x, pos_y)
-
+            if not search_all_paths:
+                return solution, end_pos, solution_path
 
         # right
         if pos_x < len(solution[0]) - 1 and maze.vertical_edges[pos_y][pos_x] is False:
@@ -160,7 +166,7 @@ def render_edges(state: LightningModeState, display: Surface):
         display.blit(state.rendered_edges, (0, 0))
         return
 
-    target_surface = Surface((display.get_width(), display.get_height()))
+    target_surface = Surface((display.get_width(), display.get_height()), pygame.SRCALPHA, 32).convert_alpha()
 
     cell_size = get_cell_size(state.solution, target_surface)
 
@@ -225,7 +231,7 @@ def ceiling_step_for_exploring(lightning_mode_state: LightningModeState):
 
 
 def ceiling_step_for_backtracking(lightning_mode_state: LightningModeState):
-    return ceiling_step_for_exploring(lightning_mode_state) + lightning_mode_state.solution_len // 2
+    return ceiling_step_for_exploring(lightning_mode_state) + lightning_mode_state.solution_len // 3
 
 
 def rendering_state_of_current_step(lightning_mode_state: LightningModeState):
@@ -256,8 +262,8 @@ def render_numbers(lightning_mode_state: LightningModeState, display: Surface):
 def render_frontier_cell(display, cell_size, x_idx, y_idx, alpha):
     s = pygame.Surface(cell_size)
     s.set_alpha(alpha)
-    s.fill((255, 255, 0))
-    display.blit(s, (x_idx * cell_size[0], y_idx * cell_size[1]))
+    s.fill(YELLOW)
+    display.blit(s, (x_idx * (cell_size[0]), y_idx * (cell_size[1])))
 
 
 def render_frontier(lightning_mode_state, display):
@@ -280,6 +286,9 @@ def render_frontier(lightning_mode_state, display):
     min_alpha = 10
     max_x = max(map(keyfunc, current_max_cells_flattened))
 
+    render_frontier_cell(display, cell_size, lightning_mode_state.solution_path[0][0],
+                         lightning_mode_state.solution_path[0][1], 255)
+
     increment = (max_alpha - min_alpha) // (max_x + 1)
     for cell in current_max_cells_flattened:
         alpha = (cell[0] + 1) * increment
@@ -288,11 +297,11 @@ def render_frontier(lightning_mode_state, display):
 
 def render_from_exploring(lightning_mode_state: LightningModeState, display: Surface):
     render_background(lightning_mode_state, display)
-    render_edges(lightning_mode_state, display)
-    if lightning_mode_state.show_numbers:
-        render_numbers(lightning_mode_state, display)
 
     render_frontier(lightning_mode_state, display)
+    if lightning_mode_state.show_numbers:
+        render_numbers(lightning_mode_state, display)
+    render_edges(lightning_mode_state, display)
 
 
 def render_from_backtracking(lightning_mode_state: LightningModeState, display: Surface):
@@ -300,32 +309,40 @@ def render_from_backtracking(lightning_mode_state: LightningModeState, display: 
     s = lightning_mode_state.solution
     cell_size = get_cell_size(s, display)
     render_background(lightning_mode_state, display)
-    render_edges(lightning_mode_state, display)
-    if lightning_mode_state.show_numbers:
-        render_numbers(lightning_mode_state, display)
-    current_backtracking_step = lightning_mode_state.current_step - ceiling_step_for_exploring(lightning_mode_state)
-    up_to_number = lightning_mode_state.solution_len - (current_backtracking_step * 2)
 
-    s = lightning_mode_state.solution
+    current_backtracking_step = lightning_mode_state.current_step - ceiling_step_for_exploring(lightning_mode_state)
+    up_to_number = lightning_mode_state.solution_len - (current_backtracking_step * 3)
+
+    p = lightning_mode_state.solution_path
+    render_frontier_cell(display, cell_size, p[0][0], p[0][1], 255)
     for c in reversed(lightning_mode_state.solution_path):
         v = s[c[1]][c[0]]
         if v < up_to_number:
             break
-        render_frontier_cell(display, cell_size, c[0], c[1], 220)
+        render_frontier_cell(display, cell_size, c[0], c[1], 255)
+    if lightning_mode_state.show_numbers:
+        render_numbers(lightning_mode_state, display)
+    render_edges(lightning_mode_state, display)
 
 
 def render_from_flashing(lightning_mode_state: LightningModeState, display: Surface):
     s = lightning_mode_state.solution
     cell_size = get_cell_size(s, display)
     render_background(lightning_mode_state, display)
-    render_edges(lightning_mode_state, display)
-    if lightning_mode_state.show_numbers:
-        render_numbers(lightning_mode_state, display)
-    current_flashing_step = lightning_mode_state.current_step - ceiling_step_for_backtracking(lightning_mode_state)
+
+    current_flashing_step = lightning_mode_state.current_step - ceiling_step_for_backtracking(lightning_mode_state) - 1
+
+    if current_flashing_step == 0 and lightning_mode_state.enable_sound:
+        Assets.lightning_strike_sound.play()
 
     if current_flashing_step % 2 == 0 or current_flashing_step > 10:
         for c in lightning_mode_state.solution_path:
-            render_frontier_cell(display, cell_size, c[0], c[1], 220)
+            render_frontier_cell(display, cell_size, c[0], c[1], 255)
+
+    if lightning_mode_state.show_numbers:
+        render_numbers(lightning_mode_state, display)
+
+    render_edges(lightning_mode_state, display)
 
 
 rendering_state_switch = {
@@ -344,4 +361,24 @@ def draw_current_step(lightning_mode_state: LightningModeState, display: Surface
 
 
 def calculate_final_step(state: LightningModeState):
-    return ceiling_step_for_backtracking(state) + state.solution_len * 2
+    return ceiling_step_for_backtracking(state) + state.solution_len * 3
+
+
+class LightningModeWidgets:
+    def __init__(self):
+        self.lightning_mode_state: LightningModeState = None
+        self.pause_play_button: Clickable = None
+        self.restart_button: Clickable = None
+        self.time_slider: SliderXSetter = None
+        self.show_numbers_checkbox: Checker = None
+        self.lightning_mode_is_paused = False
+        self.quit_button = None
+        self.search_all_paths_checkbox: Checker = None
+        self.enable_sound_checkbox: Checker = None
+        self.static_widgets: [] = None
+        self.show_numbers_checkbox = Checker(text="Show numbers", value=False, type_="checkbox")
+        self.search_all_paths_checkbox = Checker(text="Search all paths", value=False, type_="checkbox")
+        self.enable_sound_checkbox = Checker(text="Enable sound", value=False, type_="checkbox")
+        self.static_widgets = [self.show_numbers_checkbox,
+                               self.search_all_paths_checkbox,
+                               self.enable_sound_checkbox]
