@@ -142,6 +142,10 @@ def transition_to_showing_lightning_maze_screen(state: State):
     def pause_func():
         state.lightning_mode_is_paused = not state.lightning_mode_is_paused
         state.lightning_mode_widgets.pause_play_button.set_text("Play" if state.lightning_mode_is_paused else "Pause")
+        if state.lightning_mode_is_paused:
+            pygame.mixer.pause()
+        else:
+            pygame.mixer.unpause()
         state.lightning_mode_widgets.time_slider.set_active(state.lightning_mode_is_paused)
 
     state.lightning_mode_widgets.enable_sound_checkbox.set_topleft((115, 80))
