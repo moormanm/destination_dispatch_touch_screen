@@ -11,7 +11,7 @@ class Assets:
     numberblock_13 = pygame.transform.scale(pygame.image.load('assets/numberblock_13.png'), (207, 300))
     numberblock_10 = pygame.transform.scale(pygame.image.load('assets/numberblock_10.png'), (183, 250))
     numberblock_3 = pygame.transform.scale(pygame.image.load('assets/numberblock_3.png'), (117, 250))
-    easter_bunny = pygame.transform.scale(pygame.image.load('assets/easter_bunny.png'), (300,330))
+    easter_bunny = pygame.transform.scale(pygame.image.load('assets/easter_bunny.png'), (300, 330))
     font = pygame.font.SysFont('Sans', 32)
 
     little_font = pygame.font.SysFont('Sans', 16)
@@ -36,6 +36,9 @@ class Assets:
 
     button_lightning_pressed = pygame.transform.scale(pygame.image.load('assets/lightning.png'), (60, 60))
     button_lightning_unpressed = pygame.transform.scale(pygame.image.load('assets/lightning.png'), (60, 60))
+
+    button_calc_pressed = pygame.transform.scale(pygame.image.load('assets/hp_pressed.png'), (60, 60))
+    button_calc_unpressed = pygame.transform.scale(pygame.image.load('assets/hp_unpressed.jpg'), (60, 60))
 
     keypad_sounds = {
         '0': pygame.mixer.Sound('assets/0.wav'),
@@ -75,6 +78,37 @@ class Assets:
     floor_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_13_who_said_that.wav')
     floor_minus_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_minus_13_who_said_that.wav')
     lightning_mode_step_number_line = little_font.render("Step Number", True, (255, 255, 255))
+
+    hp_calcs = [
+        'assets/calcs/hp12c.png',
+        'assets/calcs/hp15climitededition.png',
+        'assets/calcs/hp20b.jpeg',
+        'assets/calcs/hp30b.jpeg',
+        'assets/calcs/hp33s.jpeg',
+        'assets/calcs/hp35s.jpeg',
+        'assets/calcs/hp39gII.jpeg',
+        'assets/calcs/hp41c.jpeg',
+        'assets/calcs/hp42s.jpeg',
+        'assets/calcs/hp48sx.jpeg',
+        'assets/calcs/hp48gx.jpeg',
+        'assets/calcs/hp48gII.jpeg',
+        'assets/calcs/hp49g.jpeg',
+        'assets/calcs/hp49gplus.jpeg',
+        'assets/calcs/hp50g.jpeg',
+        'assets/calcs/hpprime.jpeg',
+    ]
+
+    @classmethod
+    def make_calc_asset(cls, asset_path):
+        surf = pygame.image.load(asset_path)
+        max_width = 800
+        max_height = 450
+        best_ratio = min(max_width / surf.get_width(), max_height / surf.get_height())
+        w = best_ratio * surf.get_width()
+        h = best_ratio * surf.get_height()
+        print(f'w={w}, h={h}, img={asset_path}')
+        return pygame.transform.scale(surf, (w, h))
+
     @classmethod
     def handicap_sound_for_button(cls, button_id):
         return Assets.keypad_sounds.get(button_id)

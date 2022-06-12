@@ -12,6 +12,7 @@ import random
 import sqlite3
 from os.path import expanduser
 import pygame
+from pyvidplayer import Video
 
 frame_rate = 30
 home = expanduser("~")
@@ -83,6 +84,9 @@ def update_from_accepting_new_input(state):
         return
     if update_lightning_mode_button_state(state):
         transition_to_showing_lightning_maze_screen(state)
+        return
+    if update_calc_button_state(state):
+        transition_to_showing_calculator_gallery(state)
         return
 
     for event in state.events:
@@ -160,9 +164,9 @@ def transition_to_showing_lightning_maze_screen(state: State):
 
     state.lightning_mode_widgets.pause_play_button.set_topleft((75, 280))
     state.lightning_mode_widgets.time_slider = thorpy.SliderX(length=150,
-                                                      limvals=(0, state.lightning_mode_state.final_step),
-                                                      text='',
-                                                      type_=int)
+                                                              limvals=(0, state.lightning_mode_state.final_step),
+                                                              text='',
+                                                              type_=int)
     state.lightning_mode_widgets.time_slider.set_topleft((10, 200))
     state.lightning_mode_widgets.time_slider.get_slider().set_size((150, 30))
     state.lightning_mode_widgets.time_slider.get_dragger().set_size((15, 50))
@@ -182,7 +186,8 @@ def transition_to_showing_lightning_maze_screen(state: State):
     )
     state.lightning_mode_widgets.time_slider.add_reactions([slider_reaction_pause])
     state.thorpy_base_menu.set_elements(
-        state.lightning_mode_widgets.static_widgets + [state.lightning_mode_widgets.restart_button, state.lightning_mode_widgets.quit_button,
+        state.lightning_mode_widgets.static_widgets + [state.lightning_mode_widgets.restart_button,
+                                                       state.lightning_mode_widgets.quit_button,
                                                        state.lightning_mode_widgets.pause_play_button,
                                                        state.lightning_mode_widgets.time_slider])
     state.thorpy_base_menu.refresh()
@@ -328,6 +333,20 @@ def update_about_button_state(state):
 def update_lightning_mode_button_state(state):
     btn = None
     for hc in state.lightning_mode_button_group:
+        btn = hc
+
+    for event in state.events:
+        btn.handle_event(event)
+        btn.update(state)
+        if btn.was_depressed:
+            return True
+
+    return False
+
+
+def update_calc_button_state(state):
+    btn = None
+    for hc in state.calculator_gallery_button_group:
         btn = hc
 
     for event in state.events:
@@ -529,6 +548,7 @@ def render_from_accepting_new_input(state, display):
     state.choose_floors_button_group.draw(display)
     state.about_button_group.draw(display)
     state.lightning_mode_button_group.draw(display)
+    state.calculator_gallery_button_group.draw(display)
 
 
 def render_from_appending_input(state, display):
@@ -539,6 +559,7 @@ def render_from_appending_input(state, display):
     state.about_button_group.draw(display)
     state.lightning_mode_button_group.draw(display)
     state.choose_floors_button_group.draw(display)
+    state.calculator_gallery_button_group.draw(display)
     text = Assets.font.render(state.floor_selection_buffer, True, (255, 255, 255))
     display.blit(text, (500, 300))
 
@@ -769,6 +790,7 @@ def render_from_showing_destination_buttons_screen(state, display):
     state.handicap_button_group.draw(display)
     state.about_button_group.draw(display)
     state.lightning_mode_button_group.draw(display)
+    state.calculator_gallery_button_group.draw(display)
     state.more_floors_button_group.draw(display)
     state.back_to_keypad_button_group.draw(display)
 
@@ -781,6 +803,11 @@ def update_from_showing_destination_buttons_screen(state):
     if update_lightning_mode_button_state(state):
         transition_to_showing_lightning_maze_screen(state)
         return
+
+    if update_calc_button_state(state):
+        transition_to_showing_calculator_gallery(state)
+        return
+
     more_floors_button = None
     for hc in state.more_floors_button_group:
         more_floors_button = hc
@@ -815,6 +842,30 @@ def update_from_stats_screen(state):
         transition_to_accepting_new_input(state)
 
 
+def transition_to_showing_calculator_gallery(state: State):
+    state.state_type = StateType.ShowingCalculatorGallery
+    state.last_calculator_gallery_change = millis()
+    state.current_calc_showing = 0
+    state.vid = Video("assets/videoplayback.mp4")
+    state.vid.set_size((1024, 600))
+    state.drew_bg = False
+
+
+def update_from_showing_calculator_gallery(state: State):
+    for event in state.events:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            state.vid.close()
+            transition_to_accepting_new_input(state)
+            return
+
+
+def render_from_showing_calculator_gallery(state: State, display):
+    if not state.drew_bg:
+        render_bg(display)
+        state.drew_bg = True
+    state.vid.draw(display, (0, 0), force_draw=False)
+
+
 def update_from_showing_lightning_screen(state: State):
     state.lightning_mode_state.show_numbers = state.lightning_mode_widgets.show_numbers_checkbox.get_value()
     state.lightning_mode_widgets.time_slider.get_slider().set_text(str(state.lightning_mode_state.current_step))
@@ -836,7 +887,8 @@ update_funcs = {
     StateType.ShowingAboutScreen: update_from_about_screen,
     StateType.ShowingDestinationButtonsScreen: update_from_showing_destination_buttons_screen,
     StateType.ShowingStatsScreen: update_from_stats_screen,
-    StateType.ShowingLightningMazeScreen: update_from_showing_lightning_screen
+    StateType.ShowingLightningMazeScreen: update_from_showing_lightning_screen,
+    StateType.ShowingCalculatorGallery: update_from_showing_calculator_gallery
 }
 
 
@@ -852,7 +904,8 @@ render_funcs = {
     StateType.ShowingAboutScreen: render_from_showing_about_screen,
     StateType.ShowingDestinationButtonsScreen: render_from_showing_destination_buttons_screen,
     StateType.ShowingStatsScreen: render_from_showing_stats_screen,
-    StateType.ShowingLightningMazeScreen: render_from_showing_lightning_screen
+    StateType.ShowingLightningMazeScreen: render_from_showing_lightning_screen,
+    StateType.ShowingCalculatorGallery: render_from_showing_calculator_gallery,
 }
 
 
@@ -872,6 +925,7 @@ def main():
         display = pygame.display.set_mode((1024, 600))
 
     state = State(display)
+    # transition_to_showing_calculator_gallery(state)
     clock = pygame.time.Clock()
     run = True
     while run:

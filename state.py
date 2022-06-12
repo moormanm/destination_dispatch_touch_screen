@@ -24,6 +24,7 @@ class StateType(enum.Enum):
     ShowingDestinationButtonsScreen = 6
     ShowingStatsScreen = 7
     ShowingLightningMazeScreen = 8
+    ShowingCalculatorGallery = 9
 
 
 class StatsType(enum.Enum):
@@ -64,6 +65,12 @@ def init_lightning_mode_button():
     return ret
 
 
+def init_calculator_gallery_button():
+    ret = pygame.sprite.Group()
+    ret.add(PressableButton(830, 430, Assets.button_calc_pressed, Assets.button_calc_unpressed))
+    return ret
+
+
 def init_floor_stats_button():
     ret = pygame.sprite.Group()
     ret.add(DestinationButton("F Stats", 670, 490, width=110))
@@ -94,6 +101,8 @@ def init_back_to_keypad_button():
     return ret
 
 
+
+
 class State:
     def __init__(self, display):
         self.run = True
@@ -104,6 +113,7 @@ class State:
         self.handicap_button_group = init_handicap_button()
         self.about_button_group = init_about_button()
         self.lightning_mode_button_group = init_lightning_mode_button()
+        self.calculator_gallery_button_group = init_calculator_gallery_button()
         self.floor_stats_button_group = init_floor_stats_button()
         self.car_stats_button_group = init_car_stats_button()
         self.choose_floors_button_group = init_choose_floors_button()
@@ -127,7 +137,7 @@ class State:
         self.lightning_mode_widgets: LightningModeWidgets = LightningModeWidgets()
         self.lightning_mode_is_paused = None
         self.thorpy_base_menu = thorpy.Menu()
-
+        self.hp_calc_assets = list(map(Assets.make_calc_asset, Assets.hp_calcs))
 
 
 class Direction(enum.Enum):
@@ -224,5 +234,3 @@ def init_keypad_sprites():
     ret.add(KeypadButton("-", x_origin + x_space * x_idx, y_origin + y_space * y_idx))
 
     return ret
-
-

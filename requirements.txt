@@ -1,0 +1,10 @@
+ffpyplayer==4.3.5
+pymediainfo==5.1.0
+thorpy==1.8.1
+pygame==2.1.2
+
+
+brew install sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_net sdl2_ttf
+
+
+https://matham.github.io/ffpyplayer/installation.html
