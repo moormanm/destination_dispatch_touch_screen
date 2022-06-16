@@ -945,8 +945,9 @@ def main():
         print("Using windowed mode", flush=True)
         display = pygame.display.set_mode((1024, 600))
 
+    print("start initting state", flush=True)
     state = State(display)
-
+    print("done initting state", flush=True)
     clock = pygame.time.Clock()
     run = True
     while run:
