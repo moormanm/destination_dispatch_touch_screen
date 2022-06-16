@@ -1,6 +1,6 @@
 
 
-print("initting main.py")
+print("initting main.py", flush=True)
 
 import datetime
 import string
@@ -17,6 +17,7 @@ import sqlite3
 from os.path import expanduser
 import pygame
 from pyvidplayer import Video
+import sys
 
 frame_rate = 30
 home = expanduser("~")
@@ -935,7 +936,7 @@ def main():
     print("initting main")
     pygame.init()
     print(pygame.display.Info().current_w, "x", pygame.display.Info().current_h)
-
+    sys.stdout.flush()
     if environ.get('FULL_SCREEN') is not None:
         print("Using full screen mode")
         pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))

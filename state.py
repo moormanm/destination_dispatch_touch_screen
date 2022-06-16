@@ -1,5 +1,5 @@
 
-print("initting state.py")
+print("initting state.py", flush=True)
 
 import enum
 

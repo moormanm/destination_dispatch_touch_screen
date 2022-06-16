@@ -1,17 +1,17 @@
 
-print("initting assets.py")
+print("initting assets.py", flush=True)
 
 import pygame
 
-print("initting font")
+print("initting font", flush=True)
 pygame.font.init()
 
 
-print("initting music")
+print("initting music", flush=True)
 pygame.mixer.init()
 
 
-print("initting Assets")
+print("initting Assets", flush=True)
 
 class Assets:
 
