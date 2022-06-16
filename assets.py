@@ -79,25 +79,6 @@ class Assets:
     floor_minus_13_error_sound = pygame.mixer.Sound('assets/Unlucky_floor_minus_13_who_said_that.wav')
     lightning_mode_step_number_line = little_font.render("Step Number", True, (255, 255, 255))
 
-    hp_calcs = [
-        'assets/calcs/hp12c.png',
-        'assets/calcs/hp15climitededition.png',
-        'assets/calcs/hp20b.jpeg',
-        'assets/calcs/hp30b.jpeg',
-        'assets/calcs/hp33s.jpeg',
-        'assets/calcs/hp35s.jpeg',
-        'assets/calcs/hp39gII.jpeg',
-        'assets/calcs/hp41c.jpeg',
-        'assets/calcs/hp42s.jpeg',
-        'assets/calcs/hp48sx.jpeg',
-        'assets/calcs/hp48gx.jpeg',
-        'assets/calcs/hp48gII.jpeg',
-        'assets/calcs/hp49g.jpeg',
-        'assets/calcs/hp49gplus.jpeg',
-        'assets/calcs/hp50g.jpeg',
-        'assets/calcs/hpprime.jpeg',
-    ]
-
     @classmethod
     def make_calc_asset(cls, asset_path):
         surf = pygame.image.load(asset_path)

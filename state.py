@@ -138,7 +138,6 @@ class State:
         self.lightning_mode_widgets: LightningModeWidgets = LightningModeWidgets()
         self.lightning_mode_is_paused = None
         self.thorpy_base_menu = thorpy.Menu()
-        self.hp_calc_assets = list(map(Assets.make_calc_asset, Assets.hp_calcs))
 
 
 class Direction(enum.Enum):
