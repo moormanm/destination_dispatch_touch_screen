@@ -134,9 +134,11 @@ def transition_to_showing_lightning_maze_screen(state: State):
     state.lightning_mode_is_paused = False
 
     def restart_func():
+        Assets.lightning_strike_sound.stop()
         transition_to_showing_lightning_maze_screen(state)
 
     def quit_func():
+        Assets.lightning_strike_sound.stop()
         transition_to_accepting_new_input(state)
 
     def pause_func():
@@ -275,6 +277,14 @@ def update_from_appending_input(state):
     update_handicap_button_state(state)
     if update_floor_selection_button_state(state):
         transition_to_choose_floor_screen(state)
+        return
+
+    if update_lightning_mode_button_state(state):
+        transition_to_showing_lightning_maze_screen(state)
+        return
+
+    if update_calc_button_state(state):
+        transition_to_showing_calculator_gallery(state)
         return
 
     if millis() - state.appending_input_start_millis > 5000:
