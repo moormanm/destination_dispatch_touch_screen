@@ -105,6 +105,7 @@ def init_back_to_keypad_button():
 
 class State:
     def __init__(self, display):
+        print("initting State..")
         self.run = True
         self.state_type = StateType.AcceptingNewInput
         self.floor_selection_buffer = ""
