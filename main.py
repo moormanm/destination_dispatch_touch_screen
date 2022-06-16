@@ -933,20 +933,20 @@ def render_state(state, display):
 
 
 def main():
-    print("initting main")
+    print("initting main", flush=True)
     pygame.init()
-    print(pygame.display.Info().current_w, "x", pygame.display.Info().current_h)
-    sys.stdout.flush()
+    print(pygame.display.Info().current_w, "x", pygame.display.Info().current_h, flush=True)
+
     if environ.get('FULL_SCREEN') is not None:
-        print("Using full screen mode")
+        print("Using full screen mode", flush=True)
         pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
         display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     else:
-        print("Using windowed mode")
+        print("Using windowed mode", flush=True)
         display = pygame.display.set_mode((1024, 600))
 
     state = State(display)
-    # transition_to_showing_calculator_gallery(state)
+
     clock = pygame.time.Clock()
     run = True
     while run:
