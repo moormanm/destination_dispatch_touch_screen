@@ -1,8 +1,14 @@
 import pygame
 
+print("initting font")
 pygame.font.init()
-pygame.mixer.init()
 
+
+print("initting music")
+pygame.mixer.music.init()
+
+
+print("initting Assets")
 
 class Assets:
 
