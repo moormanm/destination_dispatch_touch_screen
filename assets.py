@@ -5,7 +5,7 @@ pygame.font.init()
 
 
 print("initting music")
-pygame.mixer.music.init()
+pygame.mixer.init()
 
 
 print("initting Assets")
