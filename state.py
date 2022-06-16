@@ -1,3 +1,6 @@
+
+print("initting state.py")
+
 import enum
 
 import pygame

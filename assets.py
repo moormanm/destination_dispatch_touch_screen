@@ -1,3 +1,6 @@
+
+print("initting assets.py")
+
 import pygame
 
 print("initting font")

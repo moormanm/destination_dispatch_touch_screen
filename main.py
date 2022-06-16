@@ -1,3 +1,7 @@
+
+
+print("initting main.py")
+
 import datetime
 import string
 from datetime import date
@@ -928,7 +932,7 @@ def render_state(state, display):
 
 
 def main():
-    print("initting..")
+    print("initting main")
     pygame.init()
     print(pygame.display.Info().current_w, "x", pygame.display.Info().current_h)
 
